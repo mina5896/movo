@@ -30,11 +30,54 @@ function makeRecognition(): Recognition | null {
   return r;
 }
 
+/**
+ * Browsers ship several voices of very different quality and default to a
+ * flat, robotic one. Prefer the neural voices when the machine has them: Edge's
+ * "Online (Natural)" voices, macOS "Premium"/"Enhanced" downloads, then
+ * Chrome's Google voice. A hosted TTS service would sound better still (see
+ * DECISIONS.md), at the cost of another provider and per-reply billing.
+ */
+const VOICE_PREFERENCES: RegExp[] = [
+  /Online \(Natural\)/i,
+  /\(Premium\)/i,
+  /\(Enhanced\)/i,
+  /^Google US English$/i,
+  /^(Samantha|Ava|Allison|Zoe|Evan|Nathan)\b/i,
+  /^Google UK English Female$/i,
+];
+
+let chosenVoice: SpeechSynthesisVoice | null = null;
+
+function pickVoice(): SpeechSynthesisVoice | null {
+  if (chosenVoice) return chosenVoice;
+  const english = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith("en"));
+  if (english.length === 0) return null; // voices load asynchronously; try again next time
+  for (const pref of VOICE_PREFERENCES) {
+    const match = english.find((v) => pref.test(v.name) && v.lang.toLowerCase().startsWith("en-us")) ??
+      english.find((v) => pref.test(v.name));
+    if (match) return (chosenVoice = match);
+  }
+  return (chosenVoice = english.find((v) => v.default) ?? english[0]);
+}
+
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  // Some browsers only populate the voice list after this event.
+  window.speechSynthesis.addEventListener?.("voiceschanged", () => {
+    chosenVoice = null;
+    pickVoice();
+  });
+}
+
 function speak(text: string): Promise<void> {
   return new Promise((resolve) => {
     if (!("speechSynthesis" in window)) return resolve();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.05;
+    const voice = pickVoice();
+    if (voice) {
+      u.voice = voice;
+      u.lang = voice.lang;
+    }
+    u.rate = 1;
     u.onend = () => resolve();
     u.onerror = () => resolve();
     window.speechSynthesis.cancel();

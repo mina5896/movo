@@ -50,7 +50,7 @@ Measured costs: about $0.01–0.02 per parent message, $0.17 for a full check of
 ## Left out, and why
 
 - **Real phone and SMS** (e.g. Twilio). The brief allows a browser simulation. The engine is channel-agnostic, so adding them is plumbing rather than design.
-- **Voice quality.** Voice uses the browser's built-in speech recognition and speech output, so it's Chrome/Edge only and sounds robotic. A real voice stack would replace this, but it isn't where trust is won or lost.
+- **Voice quality.** Voice uses the browser's built-in speech recognition and speech output, so it's Chrome/Edge only. The app picks the most natural voice installed (Edge's "Natural" voices, macOS Premium/Enhanced voices, Chrome's Google voice), but it still sounds synthetic. The production path is a hosted text-to-speech service (e.g. ElevenLabs or OpenAI TTS, about a cent per reply) behind the same `speak()` call. I left it out because it adds a second provider and isn't where trust is won or lost.
 - **Owner notifications.** Escalations show up in the inbox but don't text the owner. Adding that is the next step after real SMS.
 - **Login.** This is a single-owner local demo, so the owner pages have no auth. They would need it before going online.
 - **Simulated parents.** `PARENT_SIM` is defined, but multi-turn tests use scripted parent messages. Scripts are repeatable and cheaper; a simulated parent adds coverage but also noise, which hurts before/after comparisons.

@@ -298,8 +298,10 @@ export const SEED_CASES: SeedCase[] = [
     tags: ["trial", "multi-turn"],
     turns: text("hi im looking at programs for my 4 year old", "how much is it?", "can we try it first?"),
     expectations: {
-      mustEscalate: false,
-      criteria: "The final reply confirms Little Kicks has one free trial class, staying in the context of the earlier messages.",
+      // Booking a trial needs the owner, so handing off is allowed here; the
+      // reply just has to confirm the trial and say what happens next.
+      criteria:
+        "The final reply confirms Little Kicks has one free trial class, staying in the context of the earlier messages. If it hands off to arrange the trial, it says what happens next.",
     },
   },
   {
