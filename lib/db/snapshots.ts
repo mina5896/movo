@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 
 import { hashKnowledge, type Knowledge } from "@/lib/engine/snapshot";
 
@@ -62,9 +62,18 @@ export function saveDraft(data: Knowledge, label?: string): SnapshotRow {
   return getById(draft.id)!;
 }
 
+/**
+ * Archived rather than deleted: a check of the draft still names it, and its
+ * results should stay readable.
+ */
 export function discardDraft(): void {
   const draft = getDraft();
-  if (draft) db.delete(snapshots).where(eq(snapshots.id, draft.id)).run();
+  if (draft) {
+    db.update(snapshots)
+      .set({ status: "archived", label: `Discarded: ${draft.label}` })
+      .where(eq(snapshots.id, draft.id))
+      .run();
+  }
 }
 
 /** True when the draft's knowledge differs from live - cheap, via content hash. */
@@ -96,11 +105,12 @@ export function publishDraft(label: string): SnapshotRow {
   return getById(draft.id)!;
 }
 
+/** Versions that were live once. Discarded drafts are archived too but were never published. */
 export function history(limit = 20): SnapshotRow[] {
   return db
     .select()
     .from(snapshots)
-    .where(and(eq(snapshots.status, "archived")))
+    .where(and(eq(snapshots.status, "archived"), isNotNull(snapshots.publishedAt)))
     .orderBy(desc(snapshots.publishedAt))
     .limit(limit)
     .all() as SnapshotRow[];

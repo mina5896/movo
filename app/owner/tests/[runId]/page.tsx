@@ -15,7 +15,12 @@ import {
 } from "@/lib/eval/runner";
 import { AXIS_LABELS, overallPass, type Axis, type Scores } from "@/lib/eval/types";
 
+import { draftHasChanges, getDraft } from "@/lib/db/snapshots";
+import { impactFor } from "@/lib/eval/impact";
+
 import { AutoRefresh } from "../../_components/auto-refresh";
+import { ImpactVerdict } from "../../_components/impact";
+import { PublishButton } from "../../_components/publish-button";
 import { Card, Pill, pct, timeAgo } from "../../_components/ui";
 
 type ResultRow = ReturnType<typeof runResults>[number];
@@ -261,6 +266,8 @@ async function RunView({ params }: { params: Promise<{ runId: string }> }) {
         </Card>
       )}
 
+      {baseline && run.status === "done" && <CheckHeadline snapshotId={run.snapshotId} snapshotHash={run.snapshotHash} />}
+
       {run.status === "failed" && (
         <Card className="border-[var(--danger)] p-4 text-sm text-[var(--danger)]">
           This check didn&apos;t finish (the server may have restarted). Run it again.
@@ -285,6 +292,27 @@ async function RunView({ params }: { params: Promise<{ runId: string }> }) {
       )}
       {!running && run.status === "done" && !baseline && <SingleRun rows={rows} cases={cases} />}
     </div>
+  );
+}
+
+/** The plain verdict, and a publish button while this check still describes the unpublished changes. */
+function CheckHeadline({ snapshotId, snapshotHash }: { snapshotId: string; snapshotHash: string }) {
+  const draft = getDraft();
+  const current = draft?.id === snapshotId && draft.hash === snapshotHash && draftHasChanges();
+  const impact = impactFor(snapshotHash);
+  return (
+    <Card className="flex flex-col gap-3 p-4">
+      <ImpactVerdict impact={impact} linked={false} />
+      {current && impact.state === "done" ? (
+        <div>
+          <PublishButton label={draft.label === "Unpublished changes" ? "Updated club details" : draft.label} harmful={impact.worse > 0} />
+        </div>
+      ) : (
+        <p className="text-xs text-[var(--muted)]">
+          {draft?.id === snapshotId ? "Your changes have been edited since this check." : "These changes have been published or discarded."}
+        </p>
+      )}
+    </Card>
   );
 }
 

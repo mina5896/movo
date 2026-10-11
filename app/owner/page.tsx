@@ -10,8 +10,9 @@ import { Card, Pill, timeAgo } from "./_components/ui";
 async function Threads() {
   await connection();
   const threads = listThreads().filter((t) => t.lastMessage);
-  const waiting = threads.filter((t) => t.status === "needs_attention");
-  const rest = threads.filter((t) => t.status !== "needs_attention");
+  const needsYou = (t: (typeof threads)[number]) => t.status === "needs_attention" || t.flagged.length > 0;
+  const waiting = threads.filter(needsYou);
+  const rest = threads.filter((t) => !needsYou(t));
 
   if (threads.length === 0) {
     return (
@@ -38,6 +39,9 @@ async function Threads() {
       {rest.length > 0 && (
         <section>
           <h2 className="mb-2 text-sm font-semibold">Handled by the assistant</h2>
+          <p className="mb-2 text-xs text-[var(--muted)]">
+            Every reply is double-checked by a second model. Anything it doubts moves up to &ldquo;Needs you&rdquo;.
+          </p>
           <List threads={rest} />
         </section>
       )}
@@ -64,6 +68,11 @@ function List({ threads }: { threads: ReturnType<typeof listThreads> }) {
               <span className="ml-auto text-xs text-[var(--muted)]">{timeAgo(t.lastMessageAt)}</span>
             </div>
             {t.attentionReason && <p className="mt-0.5 text-sm text-[var(--danger)]">{t.attentionReason}</p>}
+            {t.flagged.length > 0 && (
+              <p className="mt-0.5 text-sm text-[var(--warn)]">
+                ⚠ {t.flagged.length === 1 ? "A reply may be wrong" : `${t.flagged.length} replies may be wrong`}: {t.flagged[0]}
+              </p>
+            )}
             {t.lastMessage && (
               <p className="mt-0.5 truncate text-sm text-[var(--muted)]">
                 {t.lastMessage.role === "parent" ? "" : t.lastMessage.role === "owner" ? "You: " : "Assistant: "}

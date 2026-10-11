@@ -15,6 +15,7 @@ Build order:
 5. **Before/after check**: replay every test conversation on live and draft, and show what got worse.
 6. **Corrections in plain words** that become a reviewed change plus a permanent test.
 7. **Grader spot-check**, so the owner knows how far to trust the scores.
+8. **Less work for the owner**: every real reply is double-checked by a second model, and approving a fix starts the check on its own.
 
 ## Key decisions
 
@@ -30,6 +31,11 @@ Build order:
 
 **A correction becomes a change and a test.** The owner writes what was wrong in their own words. A model proposes the smallest change: fix a fact, reword a rule, or add a narrowly scoped rule. It also proposes a test pinned to that conversation. The owner sees both in plain words and approves. The change goes to the draft, never straight to parents. The test joins every future check, so a later edit can't silently bring the mistake back. That's how "never correct the same mistake twice" is enforced rather than hoped for.
 
+**The owner shouldn't have to find mistakes or run the process.** The owner isn't technical and has a club to run. Two things keep the work down to "read a flag, write a sentence, publish":
+
+- *Every real reply is double-checked.* After the parent has the reply (so it never slows them down), Claude Sonnet 5.5 reads it against the club details and rules it was given. A doubtful reply moves its conversation to *Needs you*, with the concern and a suggested correction in the owner's voice. The owner clicks *Fix it* or *It's fine*. The reviewer only points; changes still go through the correction and the check. How the owner answers its flags (corrected vs. "it's fine") is shown as its track record. This costs about half a cent per reply and can be turned off with `MOVO_AUTO_REVIEW=off`.
+- *One click from fix to verdict.* Approving a proposed fix also starts the before/after check, and the result is one line: "✓ Safe to publish: 2 answers got better, nothing got worse", or "Hold on: 1 answer got worse". A Publish button sits next to it, on the conversation itself. The side-by-side answers are a link away for anyone who wants them.
+
 **Before/after checks confirm changes before reporting them.** Both versions answer every test once. Any test whose result differs gets two more tries on each side. It's reported as "got worse" only if it consistently passes before and fails after, otherwise as "mixed". Without this, ordinary variation in wording would cry wolf. A full check costs about $0.70 and takes about 4 minutes.
 
 **Grading: hard checks first, then a judge.** "Did it hand off" and "did it say a banned phrase" are checked in code and override the judge. A different model (Claude Sonnet 5.5) grades correctness against the snapshot under test, rule-following, handoff, tone, and the test's own expectation. Facts that change (prices, dates) are judged against the snapshot, not hard-coded in tests, so a price change doesn't break the tests. Plumbing failures go in a separate table and are never averaged in as wrong answers.
@@ -42,10 +48,10 @@ Build order:
 |---|---|---|
 | Answers parents | Claude Opus 5.5, effort `medium` | Correctness and rule-following matter most |
 | Labels topics | Claude Haiku 5.5, effort `low` | Cheap, well-defined task |
-| Grades answers | Claude Sonnet 5.5 | A different model from the answerer |
+| Grades answers, reviews real replies | Claude Sonnet 5.5 | A different model from the answerer |
 | Proposes fixes | Claude Opus 5.5 | Rare, and quality matters |
 
-Measured costs: about $0.01–0.02 per parent message, $0.17 for a full check of 30 tests, and $0.70 for a before/after check.
+Measured costs: about $0.01–0.02 per parent message, plus about $0.006 for its review, $0.17 for a full check of 30 tests, and $0.70 for a before/after check.
 
 ## Left out, and why
 
@@ -62,5 +68,6 @@ Measured costs: about $0.01–0.02 per parent message, $0.17 for a full check of
 ## Known limitations
 
 - The judge is a different model but from the same family as the answerer, so it may share blind spots. The spot-check exists to measure this.
+- The reviewer can miss a bad reply, so *Something wrong with this reply?* stays on every reply. It can also flag a fine one; "It's fine" costs one click, and the dismissal count shows how often that happens.
 - A single check runs each test once. Small differences between two checks can be noise. The before/after check deals with this; comparing two separate single checks by eye doesn't.
 - Every check spends real money. The cost is shown on each check.

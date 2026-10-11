@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 
 import type { Knowledge, Program, Policy, Rule, Topic } from "@/lib/engine/snapshot";
+import type { ImpactStatus } from "@/lib/eval/impact";
+
+import { ImpactVerdict } from "../_components/impact";
 
 import {
   checkImpactAction,
@@ -30,12 +33,6 @@ const TOPIC_LABELS: Record<Topic, string> = {
   coach_concern: "coach concerns",
   other: "anything else",
 };
-
-export type ImpactStatus =
-  | { state: "none" }
-  | { state: "running"; runId: string }
-  | { state: "done"; runId: string; worse: number; better: number; unsteady: number; same: number }
-  | { state: "failed"; runId: string };
 
 export function ClubEditor({
   initial,
@@ -209,7 +206,7 @@ function StatusBar(props: {
       </div>
 
       {hasChanges && !dirty && (
-        <ImpactLine impact={impact} />
+        <ImpactVerdict impact={impact} />
       )}
 
       {props.error && <p className="text-sm text-[var(--danger)]">{props.error}</p>}
@@ -264,38 +261,6 @@ function StatusBar(props: {
 // window.confirm is used deliberately for the one irreversible-feeling action.
 function confirmText(msg: string): boolean {
   return typeof window !== "undefined" ? window.confirm(msg) : false;
-}
-
-function ImpactLine({ impact }: { impact: ImpactStatus }) {
-  if (impact.state === "none")
-    return (
-      <p className="text-sm text-[var(--muted)]">
-        Not checked yet. Checking replays every test conversation on both versions (takes a few minutes, costs well under $1).
-      </p>
-    );
-  if (impact.state === "running")
-    return (
-      <p className="text-sm">
-        Checking… <a href={`/owner/tests/${impact.runId}`} className="text-[var(--accent)] underline">watch progress</a>
-      </p>
-    );
-  if (impact.state === "failed")
-    return <p className="text-sm text-[var(--danger)]">The last check didn&apos;t finish. Run it again.</p>;
-  return (
-    <p className="text-sm">
-      {impact.worse > 0 ? (
-        <span className="font-medium text-[var(--danger)]">{impact.worse} answer{impact.worse > 1 ? "s" : ""} got worse. </span>
-      ) : (
-        <span className="font-medium text-[var(--good)]">Nothing got worse. </span>
-      )}
-      {impact.better > 0 && <span className="text-[var(--good)]">{impact.better} got better. </span>}
-      {impact.unsteady > 0 && <span className="text-[var(--warn)]">{impact.unsteady} mixed. </span>}
-      <span className="text-[var(--muted)]">{impact.same} unchanged. </span>
-      <a href={`/owner/tests/${impact.runId}`} className="text-[var(--accent)] underline">
-        See the answers
-      </a>
-    </p>
-  );
 }
 
 function Section({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {

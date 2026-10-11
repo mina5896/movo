@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 import { answer, type AnswerResult, type Turn } from "@/lib/engine/answer";
 import type { Topic } from "@/lib/engine/snapshot";
@@ -21,7 +21,22 @@ export type ThreadSummary = {
   family: { id: string; parentFirstName: string; parentLastName: string | null; phone: string | null };
   lastMessage: { body: string; role: MessageRow["role"]; channel: Channel } | null;
   channels: Channel[];
+  /** Replies the reviewer flagged that the owner hasn't looked at yet, newest first. */
+  flagged: string[];
 };
+
+/** Assistant replies the reviewer flagged and the owner hasn't answered (see lib/review.ts). */
+const isFlagged = sql`json_extract(${messages.review}, '$.state') = 'flagged'`;
+
+function flaggedConcerns(threadId: string): string[] {
+  return db
+    .select({ review: messages.review })
+    .from(messages)
+    .where(and(eq(messages.threadId, threadId), isFlagged))
+    .orderBy(desc(messages.createdAt))
+    .all()
+    .map((r) => (r.review as { concern?: string }).concern ?? "A reply may be wrong.");
+}
 
 const nowSec = () => Math.floor(Date.now() / 1000);
 
@@ -72,7 +87,7 @@ export function listThreads(): ThreadSummary[] {
     .innerJoin(families, eq(threads.familyId, families.id))
     .orderBy(
       // Anything waiting on the owner floats to the top, then most recent.
-      sql`case ${threads.status} when 'needs_attention' then 0 when 'open' then 1 else 2 end`,
+      sql`case when ${threads.status} = 'needs_attention' or exists (select 1 from ${messages} where ${messages.threadId} = ${threads.id} and ${isFlagged}) then 0 when ${threads.status} = 'open' then 1 else 2 end`,
       desc(threads.lastMessageAt),
     )
     .all();
@@ -103,6 +118,7 @@ export function listThreads(): ThreadSummary[] {
       },
       lastMessage: last ? { body: last.body, role: last.role, channel: last.channel } : null,
       channels,
+      flagged: flaggedConcerns(thread.id),
     };
   });
 }
@@ -224,12 +240,15 @@ export function setThreadStatus(threadId: string, status: ThreadStatus): void {
     .run();
 }
 
+/** Conversations waiting on the owner: handed over, or holding a reply the reviewer doubts. */
 export function attentionCount(): number {
   return (
     db
       .select({ n: sql<number>`count(*)` })
       .from(threads)
-      .where(eq(threads.status, "needs_attention"))
+      .where(
+        sql`${threads.status} = 'needs_attention' or exists (select 1 from ${messages} where ${messages.threadId} = ${threads.id} and ${isFlagged})`,
+      )
       .get()?.n ?? 0
   );
 }

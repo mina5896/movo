@@ -75,6 +75,12 @@ export const messages = sqliteTable(
     usedRules: text("used_rules", { mode: "json" }),
     /** JSON: { usage, stopReason, latencyMs, model } */
     meta: text("meta", { mode: "json" }),
+    /**
+     * Assistant turns only. JSON: a second model's read of this reply, so the
+     * owner is pointed at doubtful answers instead of reading every one. See
+     * lib/review.ts.
+     */
+    review: text("review", { mode: "json" }),
     createdAt: integer("created_at").notNull().default(now),
   },
   (t) => [index("messages_thread_idx").on(t.threadId, t.createdAt)],
@@ -95,7 +101,8 @@ export const feedback = sqliteTable("feedback", {
   ownerNote: text("owner_note").notNull(),
   /** JSON: the change and test proposed from the note, shown to the owner before anything is applied. */
   proposal: text("proposal", { mode: "json" }),
-  status: text("status", { enum: ["pending", "applied", "dismissed"] })
+  /** applied: in the draft, not yet live. published: parents get it. */
+  status: text("status", { enum: ["pending", "applied", "published", "dismissed"] })
     .notNull()
     .default("pending"),
   /** Rule id inside the draft snapshot, once the owner approves the proposal. */

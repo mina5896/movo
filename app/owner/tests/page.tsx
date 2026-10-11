@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { agreement } from "@/lib/eval/calibration";
 import { listCases, listRuns } from "@/lib/eval/runner";
 import { AXIS_LABELS, AXES } from "@/lib/eval/types";
+import { reviewStats } from "@/lib/review";
 
 import { AutoRefresh } from "../_components/auto-refresh";
 import { Card, Pill, pct, timeAgo } from "../_components/ui";
@@ -18,6 +19,7 @@ async function Overview() {
     runs.find((r) => r.status === "done" && r.label === "Live (before)");
   const anyRunning = runs.some((r) => r.status === "running");
   const cal = agreement();
+  const rev = reviewStats();
 
   return (
     <div className="flex flex-col gap-6">
@@ -69,6 +71,32 @@ async function Overview() {
           </div>
           <RunButton />
         </div>
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="font-semibold">Real conversations</h2>
+        <p className="mt-1 text-sm">
+          {rev.reviewed === 0 ? (
+            <span className="text-[var(--muted)]">No replies to parents double-checked yet.</span>
+          ) : (
+            <>
+              {rev.reviewed} {rev.reviewed === 1 ? "reply" : "replies"} to parents double-checked.{" "}
+              {rev.waiting > 0 ? (
+                <Link href="/owner" className="font-medium text-[var(--warn)] underline">
+                  {rev.waiting} waiting for you to look at
+                </Link>
+              ) : (
+                <span className="text-[var(--good)]">None waiting for you.</span>
+              )}
+            </>
+          )}
+        </p>
+        {rev.corrected + rev.dismissed > 0 && (
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Of the replies it flagged, you corrected {rev.corrected} and said {rev.dismissed} {rev.dismissed === 1 ? "was" : "were"}{" "}
+            fine.
+          </p>
+        )}
       </Card>
 
       <section>

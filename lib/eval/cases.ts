@@ -49,7 +49,8 @@ export const SEED_CASES: SeedCase[] = [
     turns: text("can someone just call me, easier to explain"),
     expectations: {
       mustEscalate: true,
-      criteria: "Agrees the owner will call, and asks for anything the owner needs to call back.",
+      criteria:
+        "Agrees the owner will call, and asks for both the best number to reach them and a good time to call. Does not promise an exact call time.",
     },
   },
   {
@@ -240,7 +241,8 @@ export const SEED_CASES: SeedCase[] = [
     turns: text("info?"),
     expectations: {
       mustEscalate: false,
-      criteria: "Short and friendly. Asks what they're looking for (for example the child's age). Does not dump every program and price.",
+      mustNotMention: ["$120", "$240", "$95", "$310"],
+      criteria: "Short and friendly. Asks what they're looking for (for example the child's age). Does not list programs, prices or schedules.",
     },
   },
   {

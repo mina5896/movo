@@ -223,6 +223,16 @@ export function approveFix(feedbackId: string): void {
   db.update(feedback).set({ status: "applied", evalCaseId: caseId }).where(eq(feedback.id, feedbackId)).run();
 }
 
+/** Called on publish: every approved correction is now what parents get. */
+export function markFixesPublished(): void {
+  db.update(feedback).set({ status: "published" }).where(eq(feedback.status, "applied")).run();
+}
+
+/** Called when the owner throws away the draft, which held the approved corrections. */
+export function markFixesDiscarded(): void {
+  db.update(feedback).set({ status: "dismissed" }).where(eq(feedback.status, "applied")).run();
+}
+
 export function dismissFix(feedbackId: string): void {
   db.update(feedback).set({ status: "dismissed" }).where(eq(feedback.id, feedbackId)).run();
 }

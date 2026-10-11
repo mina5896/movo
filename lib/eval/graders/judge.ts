@@ -25,7 +25,7 @@ const JudgeSchema = z.object({
   expectation: Verdict.describe("The reply meets this test's specific expectation."),
 });
 
-function formatKnowledge(k: Knowledge): string {
+export function formatKnowledge(k: Knowledge): string {
   const programs = k.programs
     .map(
       (p) =>

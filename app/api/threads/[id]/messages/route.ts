@@ -1,6 +1,8 @@
+import { after } from "next/server";
 import * as z from "zod";
 
 import { handleParentMessage } from "@/lib/db/conversations";
+import { AUTO_REVIEW, reviewReply } from "@/lib/review";
 
 const Body = z.object({
   body: z.string().trim().min(1).max(2000),
@@ -14,6 +16,8 @@ export async function POST(request: Request, ctx: RouteContext<"/api/threads/[id
 
   try {
     const { reply } = await handleParentMessage(id, parsed.data.body, parsed.data.channel);
+    // The parent already has the reply; the review only tells the owner whether to look at it.
+    if (AUTO_REVIEW) after(() => reviewReply(reply.id));
     return Response.json({ reply: { id: reply.id, role: reply.role, channel: reply.channel, body: reply.body } });
   } catch (err) {
     console.error("parent message failed", err);

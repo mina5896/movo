@@ -6,8 +6,10 @@ import { db } from "./index";
 import { families, snapshots, threads } from "./schema";
 
 /**
- * The club exactly as the brief describes it today. The owner will change all
- * of it from the UI; nothing here is referenced anywhere else in the code.
+ * The club as the brief describes it, plus the two corrections made while
+ * testing (marked below), so a fresh install starts where the demo left off.
+ * The owner will change all of it from the UI; nothing here is referenced
+ * anywhere else in the code.
  */
 export const SEED_KNOWLEDGE: Knowledge = {
   club: { name: "Riverside Kickers", location: "Riverside Park fields, 400 River Road" },
@@ -88,7 +90,9 @@ export const SEED_KNOWLEDGE: Knowledge = {
   rules: [
     {
       id: "tone",
-      text: "Keep replies short and friendly, and use the parent's first name when you know it.",
+      // The second half came from an owner correction during testing: "info?"
+      // got every program and price back.
+      text: "Keep replies short and friendly, and use the parent's first name when you know it. When a parent just says hi or asks for 'info' without saying what they want, don't list our programs, prices or schedules. Greet them and ask how old their child is and what they're looking for, then share only the details that fit.",
       scope: "always",
       source: "owner",
       active: true,
@@ -129,6 +133,15 @@ export const SEED_KNOWLEDGE: Knowledge = {
       text: "Always mention the free trial when a parent is considering Little Kicks or Rec League.",
       scope: ["pricing", "trial", "registration", "schedule"],
       source: "owner",
+      active: true,
+    },
+    {
+      // From an owner correction during testing: a call request was handed
+      // over without anything the owner could call back on.
+      id: "fb-callback",
+      text: "When a parent asks for a phone call, tell them you'll pass it to me, and ask for the best phone number to reach them and a good time to call, so I can actually call back. Don't promise an exact call time.",
+      scope: ["other", "injury", "payment_dispute", "financial_aid", "coach_concern"],
+      source: "feedback",
       active: true,
     },
   ],

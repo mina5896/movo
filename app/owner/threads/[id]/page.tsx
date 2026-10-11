@@ -4,11 +4,15 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { getThread } from "@/lib/db/conversations";
-import { describeChange, feedbackForMessages } from "@/lib/feedback";
+import { draftImpact, type ImpactStatus } from "@/lib/eval/impact";
+import { describeChange, feedbackForMessages, type FeedbackRow } from "@/lib/feedback";
+import { getReview } from "@/lib/review";
 
 import { AutoRefresh } from "../../_components/auto-refresh";
+import { ImpactVerdict } from "../../_components/impact";
+import { PublishButton } from "../../_components/publish-button";
 import { Card, Pill, timeAgo } from "../../_components/ui";
-import { AppliedNote, CorrectButton, ProposalActions, ReplyBox } from "./client";
+import { CorrectButton, ProposalActions, ReplyBox, ReviewFlag } from "./client";
 
 type Meta = { topics?: string[]; nextStep?: string | null; latencyMs?: number } | null;
 
@@ -18,6 +22,7 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
   const thread = getThread(id);
   if (!thread) notFound();
   const fbs = feedbackForMessages(thread.messages.map((m) => m.id));
+  const impact = draftImpact();
 
   return (
     <div className="flex flex-col gap-4">
@@ -47,6 +52,7 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
           const rules = (m.usedRules as { id: string; text: string }[] | null) ?? [];
           const mine = m.role === "parent";
           const fb = fbs.filter((f) => f.messageId === m.id);
+          const review = getReview(m.review);
           return (
             <div key={m.id} className={`flex flex-col ${mine ? "items-start" : "items-end"}`}>
               <div className="mb-0.5 flex items-center gap-2 text-xs text-[var(--muted)]">
@@ -70,9 +76,16 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
               </div>
               {m.role === "assistant" && (
                 <div className="mt-1 flex max-w-[80%] flex-col items-end gap-1">
+                  {review?.state === "flagged" && !fb.some((f) => f.status === "pending") && (
+                    <ReviewFlag messageId={m.id} concern={review.concern ?? ""} suggestion={review.suggestion} />
+                  )}
                   {(rules.length > 0 || meta?.topics) && (
                     <details className="text-right text-xs text-[var(--muted)]">
-                      <summary className="cursor-pointer">Why it said this</summary>
+                      <summary className="cursor-pointer">
+                        {review?.state === "ok" && <span className="mr-2 text-[var(--good)]">✓ double-checked</span>}
+                        {review?.state === "dismissed" && <span className="mr-2">you said this was fine ·</span>}
+                        Why it said this
+                      </summary>
                       <div className="mt-1 text-left">
                         {meta?.topics && <p>Topics it recognised: {meta.topics.join(", ")}</p>}
                         <p className="mt-1">Your rules it was given:</p>
@@ -102,12 +115,17 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
                       )}
                       <div className="mt-2">
                         {f.status === "pending" && <ProposalActions feedbackId={f.id} />}
-                        {f.status === "applied" && <AppliedNote />}
+                        {f.status === "applied" && <AppliedFix fb={f} impact={impact} />}
+                        {f.status === "published" && (
+                          <p className="text-xs text-[var(--good)]">
+                            ✓ Live for parents, with a test so this can&apos;t come back.
+                          </p>
+                        )}
                         {f.status === "dismissed" && <p className="text-xs text-[var(--muted)]">Discarded.</p>}
                       </div>
                     </Card>
                   ))}
-                  {!fb.some((f) => f.status === "pending") && <CorrectButton messageId={m.id} />}
+                  {!fb.some((f) => f.status === "pending") && review?.state !== "flagged" && <CorrectButton messageId={m.id} />}
                 </div>
               )}
             </div>
@@ -118,6 +136,25 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
       <Card className="p-4">
         <ReplyBox threadId={thread.id} status={thread.status} />
       </Card>
+    </div>
+  );
+}
+
+/** An approved fix waiting in the draft: where its check stands, and publish when it's safe. */
+function AppliedFix({ fb, impact }: { fb: FeedbackRow; impact: ImpactStatus | null }) {
+  if (!impact) return <p className="text-xs text-[var(--muted)]">Added to your changes.</p>;
+  return (
+    <div className="flex flex-col gap-2">
+      {impact.state === "running" && <AutoRefresh every={4000} />}
+      <ImpactVerdict impact={impact} />
+      {impact.state === "done" && (
+        <div className="flex flex-wrap items-center gap-3">
+          <PublishButton label={fb.proposal?.summary.slice(0, 120) ?? "Correction"} harmful={impact.worse > 0} />
+          <Link href="/owner/club" className="text-xs text-[var(--muted)] underline">
+            See all unpublished changes
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

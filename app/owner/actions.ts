@@ -17,7 +17,8 @@ import { answer, type Turn } from "@/lib/engine/answer";
 import { TOPICS, type Knowledge, type Topic } from "@/lib/engine/snapshot";
 import { saveLabel } from "@/lib/eval/calibration";
 import { setCaseActive, startComparison, startRun } from "@/lib/eval/runner";
-import { approveFix, dismissFix, proposeFix } from "@/lib/feedback";
+import { approveFix, dismissFix, markFixesDiscarded, markFixesPublished, proposeFix } from "@/lib/feedback";
+import { resolveReview } from "@/lib/review";
 
 // No auth: this is a local single-owner demo (see DECISIONS.md). Every action
 // still validates its input, since server actions are reachable by direct POST.
@@ -38,6 +39,7 @@ export async function proposeFixAction(messageId: string, note: string): Promise
   if (!text.success) return { error: "Say what was wrong in a few words." };
   try {
     await proposeFix(messageId, text.data);
+    resolveReview(messageId, "corrected");
   } catch (err) {
     console.error(err);
     return { error: "Couldn't work out a fix just now. Try again in a moment." };
@@ -46,8 +48,20 @@ export async function proposeFixAction(messageId: string, note: string): Promise
   return {};
 }
 
+/**
+ * Approving a fix also starts the before/after check, so the owner's next
+ * decision is a plain "safe to publish" or "hold on" rather than another step
+ * to remember.
+ */
 export async function approveFixAction(feedbackId: string) {
   approveFix(feedbackId);
+  startComparison(getLive().id, getOrCreateDraft().id);
+  refresh();
+}
+
+/** The owner looked at a reply the reviewer flagged and thinks it's fine. */
+export async function dismissReviewAction(messageId: string) {
+  resolveReview(z.string().parse(messageId), "dismissed");
   refresh();
 }
 
@@ -107,11 +121,13 @@ export async function saveDraftAction(data: Knowledge): Promise<{ error?: string
 
 export async function discardDraftAction() {
   discardDraft();
+  markFixesDiscarded();
   refresh();
 }
 
 export async function publishDraftAction(label: string) {
   publishDraft(z.string().trim().min(1).max(120).catch("Updated club details").parse(label));
+  markFixesPublished();
   refresh();
 }
 

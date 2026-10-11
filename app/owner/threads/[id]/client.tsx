@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 
 import {
   approveFixAction,
   dismissFixAction,
+  dismissReviewAction,
   proposeFixAction,
   replyAction,
   setStatusAction,
@@ -64,9 +64,19 @@ export function ReplyBox({ threadId, status }: { threadId: string; status: strin
   );
 }
 
-export function CorrectButton({ messageId }: { messageId: string }) {
-  const [open, setOpen] = useState(false);
-  const [note, setNote] = useState("");
+export function CorrectButton({
+  messageId,
+  initialNote = "",
+  defaultOpen = false,
+  onCancel,
+}: {
+  messageId: string;
+  initialNote?: string;
+  defaultOpen?: boolean;
+  onCancel?: () => void;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const [note, setNote] = useState(initialNote);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -107,7 +117,14 @@ export function CorrectButton({ messageId }: { messageId: string }) {
         <button disabled={pending || note.trim().length < 3} className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm text-white disabled:opacity-40">
           {pending ? "Working out the fix…" : "Suggest a fix"}
         </button>
-        <button type="button" onClick={() => setOpen(false)} className="px-3 py-1.5 text-sm text-[var(--muted)]">
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            onCancel?.();
+          }}
+          className="px-3 py-1.5 text-sm text-[var(--muted)]"
+        >
           Cancel
         </button>
       </div>
@@ -124,7 +141,7 @@ export function ProposalActions({ feedbackId }: { feedbackId: string }) {
         onClick={() => start(() => approveFixAction(feedbackId))}
         className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
       >
-        Looks right - add to my changes
+        {pending ? "Starting the check…" : "Looks right - check it"}
       </button>
       <button
         disabled={pending}
@@ -137,13 +154,37 @@ export function ProposalActions({ feedbackId }: { feedbackId: string }) {
   );
 }
 
-export function AppliedNote() {
+/**
+ * A reply the reviewer doubts. The owner either agrees and corrects it, starting
+ * from the reviewer's suggested wording, or says it's fine.
+ */
+export function ReviewFlag({ messageId, concern, suggestion }: { messageId: string; concern: string; suggestion?: string }) {
+  const [fixing, setFixing] = useState(false);
+  const [pending, start] = useTransition();
   return (
-    <p className="text-xs text-[var(--good)]">
-      Added to your unpublished changes, with a test so this can&apos;t come back.{" "}
-      <Link href="/owner/club" className="underline">
-        Review and publish →
-      </Link>
-    </p>
+    <div className="w-full rounded-xl border border-[var(--warn)] bg-[var(--warn-soft)] p-3 text-left text-sm">
+      <p>
+        <span className="font-medium">This reply may be wrong.</span> {concern}
+      </p>
+      {fixing ? (
+        <CorrectButton messageId={messageId} initialNote={suggestion ?? ""} defaultOpen onCancel={() => setFixing(false)} />
+      ) : (
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            onClick={() => setFixing(true)}
+            className="rounded-lg bg-[var(--accent)] px-3 py-1.5 text-sm font-medium text-white"
+          >
+            Fix it
+          </button>
+          <button
+            disabled={pending}
+            onClick={() => start(() => dismissReviewAction(messageId))}
+            className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm disabled:opacity-40"
+          >
+            It&apos;s fine
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
