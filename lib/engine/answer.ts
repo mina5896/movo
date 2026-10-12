@@ -2,18 +2,31 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import * as z from "zod";
 
 import { classify } from "./classify";
-import { anthropic, EngineError } from "./client";
+import { EngineError, parseStructured } from "./client";
 import { describeContext, upcomingDays, type Notice } from "./context";
 import { unsupportedFigures } from "./grounding";
 import { addUsage, costOf, MODELS, type Usage } from "./models";
 import { buildPrompt } from "./prompt";
 import type { Knowledge, Rule, Topic } from "./snapshot";
 
+export type Effort = "low" | "medium" | "high";
+
 /** Effort is the main quality/latency dial for the parent-facing path. */
-const ANSWER_EFFORT = (process.env.MOVO_ANSWER_EFFORT ?? "medium") as
-  | "low"
-  | "medium"
-  | "high";
+const ANSWER_EFFORT = (process.env.MOVO_ANSWER_EFFORT ?? "medium") as Effort;
+
+/** The model and effort a reply is written with, per channel. Tests can override them to compare. */
+export type Tuning = { model: string; effort: Effort };
+
+/**
+ * A caller is waiting in silence, so voice runs at low effort. Measured on 30
+ * test questions asked on a call: the same 30/30 pass as medium, median turn
+ * 4.1s instead of 5.0s. Sonnet at low effort was faster still (3.2s) but
+ * failed 3 of 30, including two needless handoffs. See DECISIONS.md.
+ */
+export const TUNING: Record<"text" | "voice", Tuning> = {
+  text: { model: MODELS.ANSWERER, effort: ANSWER_EFFORT },
+  voice: { model: MODELS.ANSWERER, effort: (process.env.MOVO_VOICE_EFFORT ?? "low") as Effort },
+};
 
 const AnswerSchema = z.object({
   reply: z.string().describe("The message to send the parent. Nothing else."),
@@ -48,6 +61,8 @@ export type AnswerInput = {
   now?: Date;
   /** The owner's current notices. */
   notices?: Notice[];
+  /** Overrides the channel's model and effort; used to compare settings, never in live traffic. */
+  tuning?: Tuning;
 };
 
 export type AnswerResult = {
@@ -94,6 +109,7 @@ export type AnswerResult = {
  */
 export async function answer(input: AnswerInput): Promise<AnswerResult> {
   const { knowledge, history, message, channel } = input;
+  const tuning = input.tuning ?? TUNING[channel];
   const now = input.now ?? new Date();
   const notices = input.notices ?? [];
   const context = describeContext(now, notices);
@@ -133,12 +149,12 @@ export async function answer(input: AnswerInput): Promise<AnswerResult> {
     { role: "user" as const, content: message },
   ];
   const call = (msgs: typeof messages) =>
-    anthropic().messages.parse({
-      model: MODELS.ANSWERER,
+    parseStructured({
+      model: tuning.model,
       max_tokens: 16000,
       system,
       messages: msgs,
-      output_config: { format: zodOutputFormat(AnswerSchema), effort: ANSWER_EFFORT },
+      output_config: { format: zodOutputFormat(AnswerSchema), effort: tuning.effort },
     });
 
   const started = Date.now();
@@ -219,9 +235,9 @@ export async function answer(input: AnswerInput): Promise<AnswerResult> {
 
   // Asserting the served model catches a silent provider substitution, which
   // would otherwise score a different system than the one under test.
-  if (!response.model.startsWith(MODELS.ANSWERER)) {
+  if (!response.model.startsWith(tuning.model)) {
     throw new EngineError(
-      `expected ${MODELS.ANSWERER}, was served ${response.model}`,
+      `expected ${tuning.model}, was served ${response.model}`,
       "model_mismatch",
     );
   }

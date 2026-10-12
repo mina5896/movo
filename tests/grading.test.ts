@@ -7,15 +7,22 @@ import { verdict } from "@/lib/eval/verdict";
 const o = (passes: number, total = 3) => ({ passes, total, rate: passes / total });
 
 describe("before/after verdict", () => {
-  it("calls it worse only when it's consistent", () => {
+  it("calls it worse only when chance can't explain it", () => {
     expect(verdict(o(3), o(0))).toBe("worse");
-    expect(verdict(o(2), o(1))).toBe("worse");
+    expect(verdict(o(2), o(1))).toBe("unsteady");
     expect(verdict(o(3), o(2))).toBe("unsteady");
+  });
+
+  it("weighs a test's record on the current version", () => {
+    // Passed every one of 10 earlier tries: failing 2 of 3 now isn't chance.
+    expect(verdict(o(3), o(1), o(10, 10))).toBe("worse");
+    // Fails a quarter of the time anyway: failing 3 of 3 can be chance.
+    expect(verdict(o(3), o(0), o(9, 12))).toBe("unsteady");
   });
 
   it("calls it better the same way", () => {
     expect(verdict(o(0), o(3))).toBe("better");
-    expect(verdict(o(1), o(2))).toBe("better");
+    expect(verdict(o(1), o(2))).toBe("unsteady");
   });
 
   it("reports no change when both sides agree every time", () => {

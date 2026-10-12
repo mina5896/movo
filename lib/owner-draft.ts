@@ -6,7 +6,7 @@ import { getThread } from "@/lib/db/conversations";
 import { db } from "@/lib/db";
 import { threads } from "@/lib/db/schema";
 import { getLive } from "@/lib/db/snapshots";
-import { anthropic } from "@/lib/engine/client";
+import { parseStructured } from "@/lib/engine/client";
 import { describeContext } from "@/lib/engine/context";
 import { costOf, MODELS } from "@/lib/engine/models";
 import { formatKnowledge } from "@/lib/eval/graders/judge";
@@ -57,7 +57,7 @@ export async function draftOwnerReply(threadId: string, forMessageId: string): P
   const live = getLive();
 
   try {
-    const response = await anthropic().messages.parse({
+    const response = await parseStructured({
       model: MODELS.JUDGE,
       max_tokens: 4000,
       system: `You draft replies for the owner of a youth soccer club. Their text and phone assistant handed this conversation to the owner, and the owner will read your draft, fill in any blanks, and send it as themselves.

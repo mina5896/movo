@@ -1,7 +1,7 @@
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import * as z from "zod";
 
-import { anthropic, EngineError } from "@/lib/engine/client";
+import { EngineError, parseStructured } from "@/lib/engine/client";
 import { addUsage, MODELS, type Usage } from "@/lib/engine/models";
 import type { Knowledge, Rule } from "@/lib/engine/snapshot";
 
@@ -79,7 +79,7 @@ export async function judge(input: JudgeInput): Promise<{ scores: Scores; usage:
     ? input.appliedRules.map((r) => `- ${r.text}`).join("\n")
     : "(none)";
 
-  const response = await anthropic().messages.parse({
+  const response = await parseStructured({
     model: MODELS.JUDGE,
     max_tokens: 8000,
     system: `You grade replies from the text and phone assistant of a youth soccer club, on behalf of the club's owner. Grade strictly but fairly: fail an axis only for a real problem a careful owner would care about, never for a stylistic preference.
@@ -150,7 +150,7 @@ const ClaimsSchema = z.object({
 
 /** Checks each quoted statement on its own and returns the ones that really aren't supported. */
 async function confirmUnsupported(input: JudgeInput, quotes: string[]): Promise<{ unsupported: string[]; usage: Usage }> {
-  const response = await anthropic().messages.parse({
+  const response = await parseStructured({
     model: MODELS.JUDGE,
     max_tokens: 4000,
     system: `You check statements a youth soccer club's assistant made to a parent. For each one, decide whether the club details, the date and notices, or the conversation support it. A correct calculation or a plain reading of the details counts as supported. A statement is unsupported only if it says something the sources don't say or gets something wrong.`,

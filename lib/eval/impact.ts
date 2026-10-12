@@ -9,7 +9,18 @@ import { getRun, type RunSummary } from "./runner";
 export type ImpactStatus =
   | { state: "none" }
   | { state: "running"; runId: string }
-  | { state: "done"; runId: string; worse: number; better: number; unsteady: number; same: number }
+  | {
+      state: "done";
+      runId: string;
+      worse: number;
+      better: number;
+      unsteady: number;
+      same: number;
+      /** Tests the change couldn't affect, so they weren't replayed. */
+      notReached: number;
+      /** Tests that were replayed. */
+      ran: number;
+    }
   | { state: "failed"; runId: string };
 
 /** The newest before/after check of exactly this draft content, if any. */
@@ -33,6 +44,8 @@ export function impactFor(draftHash: string): ImpactStatus {
     better: ch.filter((c) => c.verdict === "better").length,
     unsteady: ch.filter((c) => c.verdict === "unsteady").length,
     same: latest.summary.comparison.same,
+    notReached: latest.summary.comparison.notReached ?? 0,
+    ran: latest.summary.cases,
   };
 }
 

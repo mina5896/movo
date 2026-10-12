@@ -19,7 +19,8 @@ import { answer, type Turn } from "@/lib/engine/answer";
 import { endOfClubDay } from "@/lib/engine/context";
 import { TOPICS, type Knowledge, type Topic } from "@/lib/engine/snapshot";
 import { saveLabel } from "@/lib/eval/calibration";
-import { setCaseActive, startComparison, startRun } from "@/lib/eval/runner";
+import { dismissWritingJob, writeTestsForOwner } from "@/lib/eval/generate";
+import { keepCases, removePendingCase, setCaseActive, startComparison, startRun } from "@/lib/eval/runner";
 import { approveFix, dismissFix, markFixesDiscarded, markFixesPublished, proposeFix } from "@/lib/feedback";
 import { resolveReview } from "@/lib/review";
 import { hasBlanks } from "@/lib/blanks";
@@ -153,6 +154,36 @@ export async function runLiveTestsAction() {
 
 export async function setCaseActiveAction(caseId: string, active: boolean) {
   setCaseActive(caseId, active);
+  refresh();
+}
+
+const WriteTestsInput = z.object({
+  about: z.string().trim().min(2).max(200),
+  count: z.number().int().min(1).max(20),
+});
+
+/** "Write 10 tests about refunds": written in the background, then waiting for the owner to look over. */
+export async function writeTestsAction(about: string, count: number): Promise<{ error?: string }> {
+  const input = WriteTestsInput.safeParse({ about, count });
+  if (!input.success) return { error: "Say what the tests should be about, and pick how many." };
+  // Started now rather than in a callback, so the page already shows it's being written.
+  after(writeTestsForOwner(input.data.about, input.data.count));
+  refresh();
+  return {};
+}
+
+export async function keepTestsAction(caseIds: string[]) {
+  keepCases(z.array(z.string()).parse(caseIds));
+  refresh();
+}
+
+export async function removeTestAction(caseId: string) {
+  removePendingCase(z.string().parse(caseId));
+  refresh();
+}
+
+export async function dismissWritingAction(jobId: string) {
+  dismissWritingJob(z.string().parse(jobId));
   refresh();
 }
 

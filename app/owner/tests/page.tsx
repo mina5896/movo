@@ -3,13 +3,14 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { agreement } from "@/lib/eval/calibration";
+import { writingJobs } from "@/lib/eval/generate";
 import { listCases, listRuns } from "@/lib/eval/runner";
 import { AXIS_LABELS, AXES } from "@/lib/eval/types";
 import { reviewStats } from "@/lib/review";
 
 import { AutoRefresh } from "../_components/auto-refresh";
 import { Card, Pill, pct, timeAgo } from "../_components/ui";
-import { CaseToggle, RunButton } from "./client";
+import { CaseToggle, DismissWriting, KeepTests, RemoveTest, RunButton, WriteTests } from "./client";
 
 async function Overview() {
   await connection();
@@ -17,7 +18,10 @@ async function Overview() {
   const cases = listCases();
   const latestLive = runs.find((r) => r.status === "done" && !r.summary?.baselineRunId && r.label !== "Live (before)") ??
     runs.find((r) => r.status === "done" && r.label === "Live (before)");
-  const anyRunning = runs.some((r) => r.status === "running");
+  const waiting = listCases({ pending: true });
+  const writing = writingJobs();
+  const anyRunning = runs.some((r) => r.status === "running") || writing.some((j) => !j.error);
+  const bySource = (s: string) => cases.filter((c) => c.source === s).length;
   const cal = agreement();
   const rev = reviewStats();
 
@@ -128,29 +132,81 @@ async function Overview() {
       </section>
 
       <section>
-        <h2 className="mb-1 font-semibold">Test conversations ({cases.length})</h2>
+        <h2 className="mb-1 font-semibold">Add test conversations</h2>
         <p className="mb-2 text-sm text-[var(--muted)]">
-          Every correction you make adds one here, so the same mistake is caught if it ever comes back.
+          A simulated parent writes them and talks to the assistant, then a separate step writes what a good answer
+          looks like from your club details. You look them over before they count.
         </p>
-        <Card className="divide-y divide-[var(--border)]">
-          {cases.map((c) => (
-            <div key={c.id} className={`flex flex-col gap-0.5 px-4 py-2.5 text-sm ${c.active ? "" : "opacity-50"}`}>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium">{c.title}</span>
-                {c.source === "feedback" && <Pill tone="accent">from your correction</Pill>}
-                {c.expectations.mustEscalate === true && <Pill>should hand to you</Pill>}
-                <span className="ml-auto">
-                  <CaseToggle caseId={c.id} active={c.active} />
+        <Card className="flex flex-col gap-3 p-4">
+          <WriteTests />
+          {writing.map((j) => (
+            <p key={j.id} className="text-sm">
+              {j.error ? (
+                <span className="text-[var(--danger)]">
+                  {j.error} <DismissWriting jobId={j.id} />
                 </span>
-              </div>
-              <span className="text-[var(--muted)]">
-                Parent: &ldquo;{c.turns.messages.join(" → ")}&rdquo;
-              </span>
-              <span className="text-xs text-[var(--muted)]">Expects: {c.expectations.criteria}</span>
-            </div>
+              ) : (
+                <span className="text-[var(--muted)]">
+                  Writing {j.count} tests about &ldquo;{j.about}&rdquo;… about a minute.
+                </span>
+              )}
+            </p>
           ))}
         </Card>
+        {waiting.length > 0 && (
+          <Card className="mt-3 divide-y divide-[var(--border)]">
+            <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+              <div className="flex-1">
+                <p className="font-medium">
+                  {waiting.length} new {waiting.length === 1 ? "test" : "tests"} to look over
+                </p>
+                <p className="text-sm text-[var(--muted)]">
+                  Remove any that expect the wrong thing. The rest join every check from now on.
+                </p>
+              </div>
+              <KeepTests caseIds={waiting.map((c) => c.id)} />
+            </div>
+            {waiting.map((c) => (
+              <CaseRow key={c.id} c={c} action={<RemoveTest caseId={c.id} />} />
+            ))}
+          </Card>
+        )}
       </section>
+
+      <section>
+        <h2 className="mb-1 font-semibold">Test conversations ({cases.length})</h2>
+        <p className="mb-2 text-sm text-[var(--muted)]">
+          {bySource("seed")} written by hand, {bySource("generated")} by a simulated parent, and {bySource("feedback")} from
+          your corrections. Every correction adds one, so the same mistake is caught if it ever comes back.
+        </p>
+        <details className="group">
+          <summary className="mb-2 cursor-pointer text-sm text-[var(--accent)] underline">Show them all</summary>
+          <Card className="divide-y divide-[var(--border)]">
+            {cases.map((c) => (
+              <CaseRow key={c.id} c={c} action={<CaseToggle caseId={c.id} active={c.active} />} />
+            ))}
+          </Card>
+        </details>
+      </section>
+    </div>
+  );
+}
+
+function CaseRow({ c, action }: { c: ReturnType<typeof listCases>[number]; action: React.ReactNode }) {
+  return (
+    <div className={`flex flex-col gap-0.5 px-4 py-2.5 text-sm ${c.active || c.pending ? "" : "opacity-50"}`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium">{c.title}</span>
+        {c.source === "feedback" && <Pill tone="accent">from your correction</Pill>}
+        {c.turns.channel === "voice" && <Pill>phone call</Pill>}
+        {c.expectations.mustEscalate === true && <Pill>should hand to you</Pill>}
+        {c.expectations.mustEscalate === false && <Pill>shouldn&apos;t need you</Pill>}
+        <span className="ml-auto">{action}</span>
+      </div>
+      <span className="text-[var(--muted)]">
+        {c.turns.parentFirstName ?? "Parent"}: &ldquo;{c.turns.messages.join(" → ")}&rdquo;
+      </span>
+      <span className="text-xs text-[var(--muted)]">Expects: {c.expectations.criteria}</span>
     </div>
   );
 }

@@ -10,6 +10,8 @@ import { costOf, MODELS, type Usage } from "@/lib/engine/models";
 import type { Topic } from "@/lib/engine/snapshot";
 
 import { SEED_CASES } from "./cases";
+import type { GeneratedCase } from "./generate";
+import SIMULATED from "./simulated-cases.json";
 import { deterministicScores } from "./graders/deterministic";
 import { GRADER_VERSION, judge } from "./graders/judge";
 import { changeReaches } from "./reach";
@@ -23,7 +25,7 @@ export type EvalCase = Omit<typeof evalCases.$inferSelect, "turns" | "expectatio
 };
 
 /** Calls in flight at once. Low enough for a new account's rate limits. */
-const CONCURRENCY = 3;
+const CONCURRENCY = 5;
 /** Extra attempts per side for a case whose result changed, to tell a real change from noise. */
 const CONFIRM_REPS = 2;
 
@@ -31,13 +33,20 @@ const activeRuns: Set<string> = ((globalThis as unknown as { __movoActiveRuns?: 
   new Set());
 
 /**
- * Seed cases live in code, so a reworded seed test reaches the database on the
- * next read. Cases from the owner's corrections are never touched here.
+ * The starting tests live in code: the hand-written seed set, and the tests a
+ * simulated parent wrote (lib/eval/simulated-cases.json, see generate.ts). A
+ * reworded one reaches the database on the next read. Tests from the owner's
+ * corrections or requests are never touched here.
  */
+const CODE_CASES = [
+  ...SEED_CASES.map((c) => ({ ...c, source: "seed" as const })),
+  ...(SIMULATED as GeneratedCase[]).map((c) => ({ ...c, source: "generated" as const })),
+];
+
 export function ensureSeedCases(): void {
-  const existing = db.select().from(evalCases).where(eq(evalCases.source, "seed")).all();
-  const byId = new Map(existing.map((r) => [r.id, r]));
-  for (const c of SEED_CASES) {
+  const ids = CODE_CASES.map((c) => c.id);
+  const byId = new Map(db.select().from(evalCases).where(inArray(evalCases.id, ids)).all().map((r) => [r.id, r]));
+  for (const c of CODE_CASES) {
     const row = byId.get(c.id);
     if (
       row &&
@@ -51,7 +60,7 @@ export function ensureSeedCases(): void {
         .run();
     }
   }
-  const missing = SEED_CASES.filter((c) => !byId.has(c.id));
+  const missing = CODE_CASES.filter((c) => !byId.has(c.id));
   if (missing.length === 0) return;
   db.insert(evalCases)
     .values(
@@ -61,16 +70,18 @@ export function ensureSeedCases(): void {
         tags: c.tags,
         turns: c.turns,
         expectations: c.expectations,
-        source: "seed" as const,
+        source: c.source,
       })),
     )
     .run();
 }
 
-export function listCases(opts: { activeOnly?: boolean } = {}): EvalCase[] {
+/** Tests in the set. Tests the owner asked for but hasn't kept yet are left out unless `pending` is set. */
+export function listCases(opts: { activeOnly?: boolean; pending?: boolean } = {}): EvalCase[] {
   ensureSeedCases();
   const q = db.select().from(evalCases);
-  const rows = (opts.activeOnly ? q.where(eq(evalCases.active, true)) : q)
+  const pending = eq(evalCases.pending, opts.pending ?? false);
+  const rows = (opts.activeOnly ? q.where(and(eq(evalCases.active, true), pending)) : q.where(pending))
     .orderBy(desc(evalCases.source), asc(evalCases.createdAt))
     .all();
   return rows as EvalCase[];
@@ -246,7 +257,8 @@ export function summarize(runId: string): RunSummary {
 }
 
 export type { CaseChange, CaseOutcome };
-export type Comparison = { changes: CaseChange[]; same: number };
+/** `notReached`: tests the change couldn't affect, so they weren't replayed. */
+export type Comparison = { changes: CaseChange[]; same: number; notReached?: number };
 
 /** The topics of every turn each attempt at a case took, on one run. */
 function turnTopics(runId: string): Map<string, Topic[][]> {
@@ -260,10 +272,64 @@ function turnTopics(runId: string): Map<string, Topic[][]> {
   return out;
 }
 
+/**
+ * Every set of topics each case's turns have ever been given, across all past
+ * checks. The topic labeller only sees the parent's words, the recent
+ * conversation and the program names, so this is the best evidence of which
+ * details and rules a case can see.
+ */
+function pastTopics(caseIds: string[]): Map<string, Topic[][]> {
+  const out = new Map<string, Topic[][]>();
+  if (caseIds.length === 0) return out;
+  const rows = db
+    .select({ caseId: evalResults.caseId, trajectory: evalResults.trajectory })
+    .from(evalResults)
+    .where(inArray(evalResults.caseId, caseIds))
+    .all();
+  for (const r of rows) {
+    const turns = (r.trajectory as { turns?: { topics?: Topic[] }[] } | null)?.turns ?? [];
+    const list = out.get(r.caseId) ?? [];
+    list.push(...turns.map((t) => t.topics ?? []));
+    out.set(r.caseId, list);
+  }
+  return out;
+}
+
+/**
+ * How each case has done on one version of the club details, over every check
+ * on record with the same grader: the evidence for whether a failure after a
+ * change is new or just how that test behaves.
+ */
+function record(snapshotHash: string, graderVersion: string, caseIds: string[]): Record<string, CaseOutcome> {
+  const out: Record<string, CaseOutcome> = {};
+  if (caseIds.length === 0) return out;
+  const rows = db
+    .select({ caseId: evalResults.caseId, scores: evalResults.scores })
+    .from(evalResults)
+    .innerJoin(evalRuns, eq(evalResults.runId, evalRuns.id))
+    .where(
+      and(
+        eq(evalRuns.snapshotHash, snapshotHash),
+        eq(evalRuns.graderVersion, graderVersion),
+        inArray(evalResults.caseId, caseIds),
+      ),
+    )
+    .all();
+  for (const r of rows) {
+    const o = (out[r.caseId] ??= { passes: 0, total: 0, rate: 0 });
+    o.total++;
+    if (overallPass(r.scores as Scores)) o.passes++;
+  }
+  for (const o of Object.values(out)) o.rate = o.passes / o.total;
+  return out;
+}
+
 export function compare(liveId: string, draftId: string): Comparison {
   const live = summarize(liveId).perCase;
   const draft = summarize(draftId).perCase;
-  const before = getById(getRun(liveId)!.snapshotId)!.data;
+  const liveRun = getRun(liveId)!;
+  const history = record(liveRun.snapshotHash, liveRun.graderVersion, Object.keys(draft));
+  const before = getById(liveRun.snapshotId)!.data;
   const after = getById(getRun(draftId)!.snapshotId)!.data;
   const liveTopics = turnTopics(liveId);
   const draftTopics = turnTopics(draftId);
@@ -274,7 +340,7 @@ export function compare(liveId: string, draftId: string): Comparison {
     const l = live[id] ?? null;
     const d = draft[id] ?? null;
     if (!l || !d) continue;
-    const v = verdict(l, d);
+    const v = verdict(l, d, history[id] ?? l);
     if (v === null) {
       same++;
       continue;
@@ -354,7 +420,16 @@ export function startComparison(liveId: string, draftId: string): { liveRunId: s
   const live = getById(liveId);
   const draft = getById(draftId);
   if (!live || !draft) throw new Error("snapshot not found");
-  const cases = listCases({ activeOnly: true });
+  // A test the change can't reach - the same details and rules for every
+  // topic it has ever touched - can't come out differently because of it, so
+  // it isn't replayed. A test with no history yet is always replayed.
+  const all = listCases({ activeOnly: true });
+  const history = pastTopics(all.map((c) => c.id));
+  const cases = all.filter((c) => {
+    const topics = history.get(c.id);
+    return !topics?.length || changeReaches(live.data, draft.data, topics);
+  });
+  const notReached = all.length - cases.length;
 
   const liveRunId = createRun(live, "Live (before)", 1);
   const draftRunId = createRun(draft, "Draft (after)", 1);
@@ -389,7 +464,10 @@ export function startComparison(liveId: string, draftId: string): { liveRunId: s
     });
 
     finishRun(liveRunId, liveCost);
-    finishRun(draftRunId, draftCost, { baselineRunId: liveRunId, comparison: compare(liveRunId, draftRunId) });
+    finishRun(draftRunId, draftCost, {
+      baselineRunId: liveRunId,
+      comparison: { ...compare(liveRunId, draftRunId), notReached },
+    });
   })()
     .catch((err) => {
       failRun(liveRunId, err);
@@ -453,4 +531,18 @@ export function casesById(ids: string[]): Map<string, EvalCase> {
 
 export function setCaseActive(caseId: string, active: boolean): void {
   db.update(evalCases).set({ active }).where(and(eq(evalCases.id, caseId))).run();
+}
+
+/** The owner keeps tests written on their request: from now on every check runs them. */
+export function keepCases(caseIds: string[]): void {
+  if (caseIds.length === 0) return;
+  db.update(evalCases)
+    .set({ pending: false, active: true })
+    .where(and(inArray(evalCases.id, caseIds), eq(evalCases.pending, true)))
+    .run();
+}
+
+/** A requested test the owner doesn't want. It never ran, so nothing else refers to it. */
+export function removePendingCase(caseId: string): void {
+  db.delete(evalCases).where(and(eq(evalCases.id, caseId), eq(evalCases.pending, true))).run();
 }

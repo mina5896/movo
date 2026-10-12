@@ -6,7 +6,7 @@ import { getMessage, getThread } from "@/lib/db/conversations";
 import { db } from "@/lib/db";
 import { messages } from "@/lib/db/schema";
 import { getById } from "@/lib/db/snapshots";
-import { anthropic } from "@/lib/engine/client";
+import { parseStructured } from "@/lib/engine/client";
 import { costOf, MODELS } from "@/lib/engine/models";
 import { formatKnowledge } from "@/lib/eval/graders/judge";
 
@@ -91,7 +91,7 @@ export async function reviewReply(messageId: string): Promise<void> {
   const nextStep = meta?.nextStep;
 
   try {
-    const response = await anthropic().messages.parse({
+    const response = await parseStructured({
       model: MODELS.JUDGE,
       max_tokens: 8000,
       system: `You check replies that a youth soccer club's text and phone assistant has already sent to parents, on behalf of the club's owner. The owner will only look at the replies you flag, so flag only real problems a careful owner would want to fix: a wrong or invented fact, a broken rule, a missed or needless handoff, or a reply that would put a family off. Never flag wording you would merely have written differently.

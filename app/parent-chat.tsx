@@ -68,6 +68,10 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
   });
 }
 
+/** Said once if a reply on a call takes longer than this. */
+const FILLER_AFTER_MS = 1500;
+const FILLERS = ["One moment.", "Let me check.", "Sure, one second."];
+
 function speak(text: string): Promise<void> {
   return new Promise((resolve) => {
     if (!("speechSynthesis" in window)) return resolve();
@@ -166,7 +170,9 @@ export function ParentChat() {
         body: JSON.stringify({ body, channel }),
       });
       const data = await res.json();
-      await refresh(threadId);
+      // On a call the reply is spoken straight away; the thread catches up alongside.
+      if (channel === "voice") void refresh(threadId);
+      else await refresh(threadId);
       if (!res.ok) {
         setError(data.fallback ?? "Something went wrong.");
         return data.fallback ?? null;
@@ -207,7 +213,12 @@ export function ParentChat() {
       if (!onCallRef.current) return;
       if (!heard.trim()) return listen(); // silence: keep the line open
       setCallState("thinking");
+      // A person on the phone says something rather than going silent while they look it up.
+      const filler = setTimeout(() => {
+        if (onCallRef.current) void speak(FILLERS[Math.floor(Math.random() * FILLERS.length)]);
+      }, FILLER_AFTER_MS);
       const reply = await send(heard, "voice");
+      clearTimeout(filler);
       if (!onCallRef.current) return;
       if (reply) {
         setCallState("speaking");

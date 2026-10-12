@@ -32,6 +32,13 @@ describe("unsupportedFigures", () => {
     expect(unsupportedFigures(reply, sources())).toEqual(["$150", "7pm", "July 2"]);
   });
 
+  it("allows a time one stated duration from a known one, when the reply names it", () => {
+    expect(unsupportedFigures("The owner decides two hours before start, so for a 10am class you'll hear by 8am.", sources())).toEqual([]);
+    expect(unsupportedFigures("After the first 10 minutes the fee starts, so from 6:25pm.", sources())).toEqual([]);
+    // The same time without the duration that explains it is still flagged.
+    expect(unsupportedFigures("Rec League practice is at 7pm tonight", sources())).toEqual(["7pm"]);
+  });
+
   it("allows prices worked out from the club's own", () => {
     // Second child 10% off, two weeks of camp, first travel month plus uniform, two Rec children.
     for (const p of ["$216", "$620", "$180", "$456"]) {

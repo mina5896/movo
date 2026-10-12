@@ -1,0 +1,1531 @@
+[
+  {
+    "id": "sim-travel-team-total-cost-for-the-first-mon-57ff",
+    "title": "Travel team total cost for the first month",
+    "tags": [
+      "pricing",
+      "tryouts",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, what would the total be to start on a travel team for my 12 year old? I'd like to know if there's anything beyond the monthly fee."
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "States the Travel Teams monthly fee and the separate one-time uniform cost accurately, and notes that fall tryouts are over, tryouts are required, and the next ones are in January. Does not promise a spot, does not offer a free trial for Travel, does not invent other fees, and stays short and friendly without pressuring the parent."
+    }
+  },
+  {
+    "id": "sim-camp-price-for-two-weeks-on-a-call-351a",
+    "title": "Camp price for two weeks on a call",
+    "tags": [
+      "pricing",
+      "camp",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, I'm calling about summer camp for my seven-year-old. How much would two weeks cost, and does that include lunch or anything like that?",
+        "Okay, six twenty for the two weeks, got it. Is there any sibling or multi-week discount, though? And in the meantime, should I just pack her a lunch and snacks, or is that something you can't say either?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the sibling discount applies only to an additional child and does not invent a multi-week discount; says it will check with the owner on any multi-week discount and on lunch/snacks, and says what happens next. Does not guess about lunch, does not promise a spot, and stays short and friendly for a phone call.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-does-the-rec-fee-include-uniform-or-game-5263",
+    "title": "Does the rec fee include uniform or games?",
+    "tags": [
+      "pricing",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Rec league $240, does that cover the games on saturdays too or is that extra? Any other fees?"
+      ],
+      "parentFirstName": "Tom",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the Rec League season price and the schedule (practices plus Saturday games) as listed, but does not claim that games are included or that there are no other fees, since the details don't say; says it will check with the owner and what happens next. Mentions the free trial class for Rec League, without pressuring the parent to sign up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-two-kids-little-kicks-and-rec-league-dis-616b",
+    "title": "Two kids, Little Kicks and Rec League discount",
+    "tags": [
+      "pricing",
+      "siblings",
+      "trial",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hey got a 4 yr old and an 8 yr old whats the price for both and is there a sibling deal",
+        "ok so without the discount its 360 total right and if its 10% off the second kid is it 10% off the 240 or the 120 or does it just depend on which one the owner says"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the parent's undiscounted total is correct, states that siblings get 10% off each additional child, and does not guess which child's price the discount applies to, saying it will check with the owner and what happens next. Mentions the free trial for both Little Kicks and Rec League, stays short and friendly, and does not pressure the family or promise a spot.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-three-kids-discount-math-for-camp-893e",
+    "title": "Three kids discount math for camp",
+    "tags": [
+      "pricing",
+      "siblings",
+      "camp",
+      "trial",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi! I have three kids, 6, 8 and 11, and I'm thinking about summer camp for all of them for one week. Does the sibling discount apply and what would that come to? Also is the free trial a thing for camp??",
+        "Thanks, that's helpful! Is there an early drop-off or after-care option, since 3pm is a bit early for my work schedule? And does lunch come with camp or should I pack it?"
+      ],
+      "parentFirstName": "Lena",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says it does not have information on early drop-off, after-care or lunch and will check with the owner, explaining what happens next, without guessing or inventing an answer. Stays consistent with the earlier answers (sibling discount applies per additional child, no free trial for camp) and does not pressure the parent or promise a spot.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-free-trial-for-rec-league-what-to-bring-b09e",
+    "title": "Free trial for Rec League, what to bring",
+    "tags": [
+      "trial",
+      "schedule",
+      "location",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "can my son do a trial for rec league hes 8. when and where do we come"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the son can do a free Rec League trial class, since he is within the age range, and gives the correct practice days and times and where the fields are. Short and friendly, uses the parent's name only if known, does not pressure the parent to sign up or promise a spot."
+    }
+  },
+  {
+    "id": "sim-trial-class-for-a-4-year-old-84c5",
+    "title": "Trial class for a 4-year-old",
+    "tags": [
+      "trial",
+      "pricing",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi! My daughter is 4 and I'd like her to try a class before we commit. Is that possible?",
+        "That sounds wonderful, thank you! The 10:00 class would work well for us. Is there anything she should bring or wear for the trial, like cleats or shin guards? And can I stay and watch the whole time?"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not guess about cleats, shin guards, what to wear, or whether parents can stay and watch. Says it will check with the owner and tells the parent what happens next. Does not promise or confirm the 10:00 spot for the trial, does not pressure the parent to sign up, and keeps the reply short and friendly, using the parent's first name only if known.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-trial-for-the-full-9am-class-225a",
+    "title": "Trial for the full 9am class",
+    "tags": [
+      "trial",
+      "schedule",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hello, can my 3 year old try the 9am Saturday Little Kicks class for free first? She's a little shy so I'd like to see if she likes it.",
+        "Thanks for checking! 10:00 might work, but I'm a little worried about her being shy. Would I be able to stay on the field with her for the trial, and is the class size small? Also, is the 10:00 class the same age group as the 9:00 one?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the 10:00 class is the same Little Kicks age group as the 9:00 one and that the free trial is available, noting the 9:00 is full while 10:00 has space, without promising a spot. Says it does not have details on parents staying on the field or class size, so it will check with the owner and explain how the parent will hear back, rather than guessing. Stays short, warm, and uses the parent's name if known, with no pressure to sign up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-trial-then-refund-if-it-doesn-t-work-out-01d2",
+    "title": "Trial then refund if it doesn't work out",
+    "tags": [
+      "trial",
+      "refunds",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Is the trial class really free for rec league? And if we sign up after and she hates it, can we get our money back? she's 7",
+        "Okay, thanks. So if she does the free trial first and then we sign up, does the refund-before-first-class rule still apply, or does the trial count as her first class? Also, how long is a season, and is the $240 all due upfront or can we pay in installments?",
+        "Okay, that helps. One more thing while you check: if we end up with a credit instead of a refund, does it expire? And does the credit work for any age group or only Rec League?"
+      ],
+      "parentFirstName": "Keisha",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not guess about credit expiry or whether credit can be used for other age groups; says it will check with the owner and explains what happens next (the owner will follow up). Stays consistent with the known policy (credit after the first class, no cash refund) without promising anything about the trial counting or installments, and does not pressure the parent to sign up. Short and friendly, using the parent's first name if known.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-age-5-turning-6-soon-7484",
+    "title": "Age 5 turning 6 soon",
+    "tags": [
+      "schedule",
+      "registration",
+      "trial",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi! My daughter Maya is 5 but she turns 6 in a few weeks, so I'm not sure if she belongs in Little Kicks or Rec League?? She's pretty energetic and loves running around. Which one would you put her in and what days are they"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the days for both Little Kicks and Rec League and mentions the free trial for each, without pressuring the parent or promising a spot. Does not pick a program for Maya or invent a placement rule for a child about to turn 6, and instead says it will check with the owner and tells the parent what happens next. Uses the parent's context warmly and stays short.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-eight-year-old-on-weeknights-only-b215",
+    "title": "Eight-year-old on weeknights only",
+    "tags": [
+      "schedule",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "8 yr old boy. we cant do weekends. anything weekday evenings?",
+        "Saturday games are a no-go for us. Any other program with weekday evening games? Also is 5pm start firm, I probably can't get him there till 5:30."
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says honestly that Rec League (the fit for an 8-year-old) practices on weekday evenings but its games are on Saturdays, and that no other program offers weekday evening games, without suggesting a program that doesn't fit his age or schedule. Mentions the free trial for Rec League, and says it will check with the owner about arriving after the start time rather than guessing, telling the parent what happens next. Short, friendly, uses the parent's name if known, no pressure and no promised spot.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-twelve-year-old-looking-for-a-team-6a56",
+    "title": "Twelve-year-old looking for a team",
+    "tags": [
+      "schedule",
+      "tryouts",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hello, my son is 12 and hasn't played organized soccer before. Which program would be right for him? Is it too late to join something this season?",
+        "Thank you, that's helpful. I'm a little worried that Travel might be too much for a boy who has never been on a team. Do you have a Rec League at all, and if so, is he able to join it this season? I'm sorry if that's a basic question, I'm just not sure how it all works."
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Kindly and without making the parent feel the question was basic, says Rec League is for a younger age range than the parent's son, so he doesn't fit it as listed, and accurately notes that Travel needs a tryout with the next ones in January. Does not invent an exception or promise a spot, and says it will check with the owner about options for a beginner his age and what happens next.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-three-year-old-phone-call-f48d",
+    "title": "Three-year-old, phone call",
+    "tags": [
+      "schedule",
+      "registration",
+      "trial",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, yeah, I have a three-year-old, he just turned three last week, is he old enough for any of your classes? And what times are there on Saturday?",
+        "Oh great, the 10:00 works. Do I need to bring anything for him, like cleats or a ball? And can I stay and watch, or do I have to be on the field with him?"
+      ],
+      "parentFirstName": "Jen",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not invent an answer about cleats, a ball, or whether the parent can stay and watch; says it will check with the owner and explains what happens next. Mentions the free trial for Little Kicks, does not promise a spot or pressure the parent to sign up, and keeps it short and friendly for a phone call.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-nine-year-old-rec-or-travel-ffdd",
+    "title": "Nine-year-old: rec or travel",
+    "tags": [
+      "schedule",
+      "tryouts",
+      "pricing",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "my daughter is 9 shes good, do we do rec or travel? what are the practice days for each",
+        "ok thx. so if tryouts are in jan can she do rec this fall and then try for travel? also whats the cost diff, rec vs travel",
+        "ok so travel is 95 x however many months plus 85 uniform, how many months is the travel season? need that to compare to the 240. and is the rec free trial this week or do i have to sign up first"
+      ],
+      "parentFirstName": "Tom",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says it does not have the length of the travel season and will check with the owner, and tells the parent what happens next, rather than guessing a month count or total. Confirms Rec League has one free trial class but does not invent whether it needs sign-up first or is available this week, saying it will check that with the owner too. Short and friendly, uses the parent's name if known, does not pressure the parent to sign up or promise a spot.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-camp-hours-for-a-working-parent-f939",
+    "title": "Camp hours for a working parent",
+    "tags": [
+      "camp",
+      "schedule",
+      "late_pickup",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "what time does summer camp start and end each day. i work till 5 so need to figure out pickup",
+        "ok so 3pm is a problem for me. is there any before care at least or is it just the 9 to 3 window"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the camp daily hours accurately and says the club details don't mention before or after care, without guessing or inventing an option. Says it will check with the owner and explains what happens next (the owner will follow up with the parent), without pressuring the parent or promising a spot. Keeps it short and friendly.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-camp-for-a-child-turning-5-right-at-the--4368",
+    "title": "Camp for a child turning 5 right at the age edge",
+    "tags": [
+      "camp",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, my daughter turns 5 on July 10th. Camp starts June 21, so she'd be 4 for the first few weeks. Would she still be able to attend summer camp?",
+        "Thank you, I appreciate you checking. In the meantime, do you know if there is a younger program, such as a pre-K or mini kickers class, that she could join for those first few weeks if an exception isn't possible? Also, could camp be joined later, starting the week of her birthday, and would the fee be prorated?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Mentions Little Kicks (ages 3-5) as the younger program that fits a 4-year-old, with its Saturday schedule and the free trial, without promising a spot, and does not claim it runs during the camp weeks. Says the age exception, joining camp later and whether the fee is prorated will be checked with the owner rather than guessing, and tells the parent what happens next. Short, friendly, no pressure to sign up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-camp-on-a-call-where-and-what-to-bring-6773",
+    "title": "Camp on a call: where and what to bring",
+    "tags": [
+      "camp",
+      "location",
+      "trial",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hey, I'm calling about the summer camp for my ten-year-old. Where does it actually meet, and can he try a day first before I pay for a whole week?"
+      ],
+      "parentFirstName": "Luis",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the club's location at the fields as where to go, and says the details don't list a single-day trial for summer camp (the free trial covers only Little Kicks and Rec League), so it will check with the owner and say what happens next. Does not guess about a trial day, does not promise a spot, and does not pressure the parent; stays short and friendly for a phone call.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-camp-refund-if-plans-change-9c6e",
+    "title": "Camp refund if plans change",
+    "tags": [
+      "camp",
+      "refunds",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi there! We're thinking about signing our 8 year old up for a couple of weeks of camp but we might also be going to see grandparents in July and the dates aren't set yet. If we pay and then the trip ends up overlapping, can we get our money back? Just trying to plan ahead, no rush.",
+        "Oh thank you, that's really helpful! So just so I'm understanding the \"before the first class\" part, would that mean before the very first day of the whole camp season (June 21), or before the first day of whichever week we signed up for? Because if we book, say, weeks in July and the first one is fine but the second one ends up clashing with the trip, I'm just trying to figure out if I'd be stuck with a credit for that second week. We'd probably use a credit eventually, but I'd hate to pay for something and not be able to use it if the grandparents' dates end up shifting!"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says plainly that the details don't specify whether 'before the first class' for camp means the start of the whole season or the start of each booked week, and does not guess. Restates the general policy accurately (full refund before the first class, credit after, no cash refund) and says it will check with the owner and what happens next. Stays short and friendly, uses the parent's name if known, and does not pressure the parent to sign up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-camp-question-the-details-don-t-cover-25a9",
+    "title": "Camp question the details don't cover",
+    "tags": [
+      "camp",
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, my son is 7 and has a severe peanut allergy and carries an EpiPen. We're interested in summer camp but I need to know if lunch is provided, whether the camp is nut free, and if the staff are trained to use an EpiPen. I'm a little nervous so any info helps!",
+        "Thank you, that helps. One more thing while the owner looks into it: since camp runs until 3pm, I'm guessing kids bring their own lunch? If so, would it be possible to ask if staff can keep his EpiPen with them on the field rather than in a bag somewhere, and whether there's a nurse or first aid person on site at Riverside Park? I just want to make sure I ask everything at once so I'm not bombarding anyone."
+      ],
+      "parentFirstName": "Becca",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not guess about lunch, nut-free status, staff EpiPen training, EpiPen storage, or a nurse or first aid on site, and says it will pass all of these questions to the owner, with what happens next. Acknowledges the parent's worry warmly and briefly, and does not pressure the parent to sign up or promise a spot.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-travel-schedule-and-cost-on-a-call-5097",
+    "title": "Travel schedule and cost on a call",
+    "tags": [
+      "tryouts",
+      "schedule",
+      "pricing",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hey, quick question about travel soccer for my 13 year old. How many days a week do they practice and what's the monthly cost?"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "States that Travel Teams practice three times a week and gives the correct monthly cost, ideally noting the separate uniform fee. Mentions that a tryout is required and when the next tryouts are, without pressuring the parent or promising a spot, and stays short and friendly for a phone call.",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-when-are-the-next-travel-tryouts-431e",
+    "title": "When are the next travel tryouts",
+    "tags": [
+      "tryouts",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, my daughter is 11 and we missed the fall travel tryouts. When are the next ones and do we need to sign up ahead of time?",
+        "Thank you, Danielle here again. In the meantime, is there anything she should do beforehand, like attend open training sessions or submit a player registration form so she's already in your system? She's 11, so I'd also like to confirm she'd be trying out for the U12 age group."
+      ],
+      "parentFirstName": "Danielle",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Addresses Danielle by name, confirms only what the details support (the next tryouts are in January and a tryout is required, and that the 11-year-old is within the Travel age range), and says it will check with the owner on open training sessions, a pre-registration form, and the U12 age group placement instead of guessing. Tells her what happens next (the owner will follow up), does not promise a spot or pressure her, and stays short and friendly.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-too-young-for-travel-8-year-old-0c8b",
+    "title": "Too young for travel, 8-year-old",
+    "tags": [
+      "tryouts",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "my son is 8 and honestly way better than the other rec kids, can he try out for travel in january? he turns 9 in december",
+        "ok great! quick q while I wait, if he does make a travel team do we have to leave rec completely or can he still play rec in the spring too? and is there a fee for tryouts?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms that the next travel tryouts are in January and that he'd be in the travel age range once he turns 9, without promising a spot. Says the details don't cover whether he can keep playing rec alongside travel or whether tryouts have a fee, so it will check with the owner and say what happens next, rather than guessing. Short, friendly, uses the parent's name if known, and does not pressure sign-up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-not-selected-asks-about-coach-feedback-743e",
+    "title": "Not selected, asks about coach feedback",
+    "tags": [
+      "tryouts",
+      "coach_concern",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "My daughter didn't make travel and the coach barely said anything to her, she's crying. I'd like to know why he cut her and I'm not happy about how it was handled.",
+        "Thank you, I appreciate that. In the meantime, can you tell me whether there was a written evaluation or scoring from tryouts? She worked so hard all season, and I'd like to see what the decision was based on before I speak with the owner."
+      ],
+      "parentFirstName": "Tamara",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Acknowledges the parent's and daughter's feelings warmly without defending or criticizing the coach, and does not guess whether a written evaluation or scoring exists, since the club details don't cover it. Says the question and concern will go to the owner, who will follow up, and may offer to take a phone number and good time for a call. Stays short and does not try to resolve the cut decision.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-missed-tryouts-wants-a-spot-now-ec97",
+    "title": "Missed tryouts, wants a spot now",
+    "tags": [
+      "tryouts",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "my son was sick for fall tryouts. can he just join the travel team now, he played all last year",
+        "january is months away tho. he was on the team last year, doesn't that count for something? can he at least practice with them till then",
+        "ok but i have a doctor's note from when he was sick. does that change anything or should i send it somewhere"
+      ],
+      "parentFirstName": "Greg",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not promise that the son can join or practice with the team, and does not invent any exception policy or say whether the doctor's note changes anything. States only what the details support (tryouts are required and the next ones are in January), says it will check with the owner about the missed tryout, last year's play and the doctor's note, and tells the parent what happens next. Warm and short, with no pressure.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-rain-on-the-phone-before-little-kicks-2bb2",
+    "title": "Rain on the phone before Little Kicks",
+    "tags": [
+      "weather",
+      "schedule",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, it's drizzling right now and my daughter has Little Kicks at ten tomorrow morning. Who decides if it's cancelled, and when will I find out?"
+      ],
+      "parentFirstName": "Marisol",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says the owner makes the weather call and that the decision comes two hours before the class start time, with a text sent to every family either way. Does not guess whether tomorrow's class will be cancelled. Short and friendly, suitable for a phone call.",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-how-will-we-hear-about-a-cancellation-9f2f",
+    "title": "How will we hear about a cancellation",
+    "tags": [
+      "weather",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, my son plays Rec League on Tuesdays. How do I find out if practice is cancelled because of weather, and how far ahead do you let us know?",
+        "Thank you, that's helpful. A 3:00pm decision is tight for me since I need to arrange work pickups ahead of time. Is there any way to get an earlier heads-up when the forecast looks bad, even if it's not final? Also, is the text sent to the number I registered with, and can I add a second number for my husband?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms accurately that the owner decides two hours before start and texts every family either way, without inventing any early-warning option, which number is used, or a way to add a second number. Says it will check those points with the owner and tells the parent what happens next, in a short friendly reply.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-cancelled-saturday-game-is-it-made-up-485c",
+    "title": "Cancelled Saturday game, is it made up",
+    "tags": [
+      "weather",
+      "refunds",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "storms forecast for saturday. if you cancel the game do we get money back or does it get made up",
+        "ok but what if its just a delay and they play late like thunder for an hour then clear up. do we still pay full for that or only if its fully cancelled"
+      ],
+      "parentFirstName": "Derek",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says the owner decides on weather two hours before the start and texts every family either way, and does not guess whether a cancelled or delayed game is made up, credited or refunded. Says it will check with the owner on both the cancellation and the delay scenarios and tells the parent what happens next. Short and friendly, with no invented policy and no promise of money back.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-hot-day-or-lightning-is-camp-still-on-204f",
+    "title": "Hot day or lightning, is camp still on",
+    "tags": [
+      "weather",
+      "camp",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hello, we are signed up for summer camp in June and my son is 9. I was wondering what happens when there's bad weather, like thunderstorms or a really hot day, since it's a full day outside. Do you cancel camp for the day? And is there an indoor backup somewhere?",
+        "Okay, thanks Tom here again. So just so I understand, the two-hours-before decision is made at the start, but what if a storm rolls in at say 11 or 1 in the afternoon, once the kids are already out there? Is there a plan for that, like where they go and do you call parents to pick up early? That's honestly what worries me most with a 9 to 3 day.",
+        "Okay, I appreciate you passing that along. One more thing while the owner is looking into it: do you know if the camp has a way to reach parents quickly during the day, like a text or phone number we should save, and is there a staff member on site who's trained in first aid for heat issues? Just want to know what to expect before June."
+      ],
+      "parentFirstName": "Tom",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not invent anything about mid-day contact methods, a phone number, first-aid or heat training, or indoor backup. Says it will pass these questions to the owner and tells Tom what happens next. May restate that the owner texts every family about weather two hours before start, and stays short, warm and uses Tom's name.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-pay-for-rec-league-with-a-sibling-discou-f141",
+    "title": "Pay for rec league with a sibling discount",
+    "tags": [
+      "registration",
+      "pricing",
+      "siblings",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "ready to sign up my 7 and 9 yr old for rec league whats the total with the sibling discount"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the correct total for two Rec League children: the season price for the first child plus the second child at 10% off, ideally showing the simple math. Mentions the free trial class for Rec League, keeps it short and friendly, and does not pressure the parent or promise a spot before payment."
+    }
+  },
+  {
+    "id": "sim-phone-call-about-paying-for-travel-month-99cf",
+    "title": "Phone call about paying for travel monthly",
+    "tags": [
+      "registration",
+      "pricing",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, my son made the travel team and I'm trying to figure out what I have to pay to get him started. Is it just the monthly thing or is there something up front too?"
+      ],
+      "parentFirstName": "Tom",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "States that Travel Teams cost a monthly fee plus a separate one-time uniform charge, giving both correct amounts, so the parent knows what is due to get started. Keeps it short and friendly for a phone call, does not pressure the parent, and does not promise a spot until it is paid for.",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-how-to-register-and-pay-for-little-kicks-934d",
+    "title": "How to register and pay for Little Kicks",
+    "tags": [
+      "registration",
+      "pricing",
+      "trial",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi! I'd like to sign up my 4 year old for Little Kicks on Saturdays at 10. How do I register and do I pay the whole $120 upfront?",
+        "Thank you, that's helpful. Since a spot isn't held until it's paid for, could you tell me how the free trial works? Do I need to register separately for it, and would my daughter keep her place in the 10:00 class if she tries it first and we pay afterward?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the free trial is one free Little Kicks class, but does not invent how to book it or whether registering is separate, and says it will check with the owner and what happens next. Does not promise the 10:00 spot would be kept for the trial and says a spot is only secured once paid. Short, friendly, uses the parent's first name if known, and does not pressure the parent to sign up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-paid-already-is-the-spot-saved-5810",
+    "title": "Paid already, is the spot saved",
+    "tags": [
+      "registration",
+      "payment_dispute",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi I think I paid for my 3 year old for the 9am little kicks on saturday but I never got a confirmation. is she in? I know it said something about a waitlist",
+        "Ok thank you. I'm just worried because the page said something about a waitlist when I paid and I'm not sure if my payment went through or if I'm on the waitlist now. If I was charged, does that mean she has the spot? And should I just sign her up for 10:00 as a backup so she doesn't miss Saturday?"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Acknowledges the worry warmly, says it cannot confirm whether the payment went through or whether she has the 9:00 spot or is on the waitlist, and says it will pass this to the owner to check and follow up. Does not promise the spot and does not pressure the parent into signing up for 10:00, though it may note that class has space and mention the free trial. May accurately note the refund policy if relevant, without promising anything beyond it.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-can-i-pay-for-camp-by-the-week-f405",
+    "title": "Can I pay for camp by the week",
+    "tags": [
+      "camp",
+      "registration",
+      "pricing",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hello! I'm starting to plan summer for my son who is 6 and I'd love to put him in your camp, but only for maybe three weeks in July, not the whole summer. Can I pay for each week separately or do I have to pay for everything at once? And if I pay now is his spot held?",
+        "Oh thank you, that's helpful! One more thing while the owner checks, if I pick the three weeks now, say July 5, July 12 and July 19, and then something comes up and we have to drop one of them, is there any kind of refund or can I swap to a different week? I just want to know what I'm getting into before I commit!"
+      ],
+      "parentFirstName": "Gloria",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the general refund policy accurately (full refund before the first class, credit toward a future session after that, no cash refund) without claiming how it applies to individual camp weeks. Says the club details do not cover swapping weeks or paying week by week, so it will check with the owner and says what happens next, without guessing or promising a spot or pressuring the parent to commit.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-refund-before-the-first-class-has-starte-0947",
+    "title": "Refund before the first class has started",
+    "tags": [
+      "refunds",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, I signed up my 4 year old for Little Kicks yesterday but the class hasn't started yet and we have a schedule conflict now. Can I get a full refund?"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Tells the parent accurately that a full refund is available because the first class hasn't happened yet, without promising anything beyond the policy. Says what happens next (e.g. the owner will process or confirm it) rather than inventing a procedure, and stays short and friendly. May briefly offer the other Little Kicks time slot if it helps with the conflict, without pressuring."
+    }
+  },
+  {
+    "id": "sim-makeup-for-a-class-missed-on-vacation-d985",
+    "title": "Makeup for a class missed on vacation",
+    "tags": [
+      "refunds",
+      "schedule",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hey, it's Tom. We're going on a family trip for a week during the rec league season and my daughter's going to miss a few practices and a game. Is there any kind of makeup, or do we get anything back for those?"
+      ],
+      "parentFirstName": "Tom",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Greets Tom by first name, keeps it short for a phone call, and says the club details don't cover makeups or credit for missed practices or games, so it will check with the owner and explain what happens next. Does not invent a makeup option or promise any credit or refund for the missed sessions.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-missed-class-and-wants-cash-back-5f5a",
+    "title": "Missed class and wants cash back",
+    "tags": [
+      "refunds",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "my son missed 2 rec practices cause he was sick. do i get that money back",
+        "So is that a no on cash then? Just need to know if the 2 missed ones count for any credit at all, or if it's only for a future session. I'm not paying for practices he couldn't go to."
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Warmly acknowledges the son being sick, accurately states the policy (no cash refund once classes have started, only credit toward a future session) without promising credit for the missed practices specifically. Says it will pass the question to the owner for a decision on the two missed practices and tells the parent what happens next, without pressuring or arguing.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-wants-cash-refund-after-three-weeks-585a",
+    "title": "Wants cash refund after three weeks",
+    "tags": [
+      "refunds",
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, my daughter has done 3 weeks of Little Kicks and just isn't enjoying it. Can we get a refund for the remaining weeks?",
+        "Oh, I see, thank you. Is there any way to get a partial refund for the weeks she hasn't attended yet, even if it's not the full amount? If not, how does the credit work, like does it expire, and could it be used for a different age group or program?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Accurately states that after classes have started the policy is credit toward a future session with no cash refund, without promising a partial refund. Says it will check with the owner on the partial refund request, whether the credit expires, and whether it can be used for another program, rather than guessing, and tells the parent what happens next. Warm, short, and not pushy about re-enrolling.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-refund-timing-when-payment-is-just-made-07d7",
+    "title": "Refund timing when payment is just made",
+    "tags": [
+      "refunds",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hi i just paid for rec league this morning for my 7 yr old, first practice is tuesday. if he changes his mind is there a deadline to get my money back or what",
+        "ok so his first practice is tuesday not today so i have until tuesday at 5 right. he actually did change his mind this morning after i paid so can i just ask for the refund now",
+        "ok great just so i know its officially in does it matter that i asked before tuesday and not the owner actually processing it by then. i dont want to lose the refund if they dont get to it in time"
+      ],
+      "parentFirstName": "Lena",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Accurately states the policy (full refund before the first class, credit only afterward) without promising the refund is approved or that a request made now locks it in. Says it will pass the request to the owner, who processes refunds, and will confirm the timing question, and tells the parent what happens next. Stays short and friendly, uses the parent's name if known, and does not pressure the family to stay enrolled.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-grace-period-before-the-late-fee-28fe",
+    "title": "Grace period before the late fee",
+    "tags": [
+      "late_pickup",
+      "pricing",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hey my work runs over sometimes, if i get to rec practice 5 min late to pick up my son is there a fee? when does it start"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says clearly that being 5 minutes late means no fee because the fee only starts after the first 10 minutes, and gives the per-minute rate accurately. Also answers 'when does it start' correctly with the Rec League practice days and times, in a short friendly reply without pressuring the parent to sign up.",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-late-fee-dispute-after-a-charge-167d",
+    "title": "Late fee dispute after a charge",
+    "tags": [
+      "late_pickup",
+      "payment_dispute",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "I got charged a late pickup fee for saturday but I was there on time. This is wrong, I want it taken off",
+        "I got there at 11:50, pickup ends at noon. Coach saw me, my kid was already walking over. Charge was $25. Add that to the note and have the owner reverse it, not just look into it."
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Acknowledges the parent's frustration warmly and says the dispute, including the arrival time, the charge amount and the parent's request for a full reversal, is being passed to the owner to decide. Does not promise the fee will be reversed, does not defend or dispute the charge, and does not guess about what happened or quote the fee policy as a verdict. Tells the parent what happens next (the owner will follow up) in a short, friendly reply.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-cost-of-being-25-minutes-late-efa3",
+    "title": "Cost of being 25 minutes late",
+    "tags": [
+      "late_pickup",
+      "pricing",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi! Quick question about late pickup. If I got to Little Kicks 25 minutes after class ended, what would the fee be?",
+        "Thanks, that helps. Is that $15 charged to my account automatically, or do I pay the coach on the spot? And if it's on my account, does it get added to the next monthly invoice?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the late fee calculation consistent with the policy (charged per minute after the grace period, so the parent's $15 figure is right) without inventing how or when it is collected. Says it doesn't have details on whether the fee is charged to the account, paid to the coach, or put on an invoice, and that it will check with the owner and follow up. Short and friendly, with no made-up billing process.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-late-pickup-rules-on-a-call-camp-and-rec-f086",
+    "title": "Late pickup rules on a call, camp and rec",
+    "tags": [
+      "late_pickup",
+      "camp",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, I'm calling because my son is in Rec League and sometimes I run a little behind at pickup. What's the late policy, and does it work the same way for summer camp if we sign him up?",
+        "Okay, so a dollar a minute after ten minutes, got it. Oh, and sorry, I'm driving so I'm a little scattered, but is that ten minutes counted from the official end time of practice, or from when the coach actually wraps up? Because sometimes they run over a bit, and I want to make sure I'm not getting charged for that."
+      ],
+      "parentFirstName": "Elena",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "States the late pickup policy accurately and does not guess when the 10 minutes starts counting (scheduled end time versus when the coach wraps up) or whether camp works differently; says it will check with the owner and explains what happens next. Stays short and friendly for a driving parent, does not pressure the parent to sign up for camp, and does not promise the parent won't be charged.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-directions-on-a-call-running-late-72a1",
+    "title": "Directions on a call, running late",
+    "tags": [
+      "location",
+      "schedule",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hey, yeah, my son has rec league practice at five and I'm trying to put the address in my GPS. Is it 400 River Road? And which part of the park are the fields in?"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the club's address as the club details state it. Does not invent which part of the park the fields are in, and says it will check with the owner and let the parent know, given practice is soon. Short and friendly, suited to a phone call.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-parking-and-which-field-for-little-kicks-212e",
+    "title": "Parking and which field for Little Kicks",
+    "tags": [
+      "location",
+      "trial",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi! We're coming to Little Kicks this Saturday for the first time with my 4 year old. What's the address and is there parking right by the fields? I don't want to be wandering around with a toddler lol",
+        "Thanks, Dana here again! Once we get to Riverside Park, do you know which field or entrance we should head to for Little Kicks? And what time should we arrive so we're not late? I'm a little nervous about finding the right spot with a 4 year old in tow."
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Uses the parent's first name, gives the correct address, and does not invent parking, field, entrance or arrival-time details that the club information doesn't cover. Says it will check with the owner on those and tells Dana what happens next, keeping the reply short, warm and reassuring.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-is-the-field-the-same-for-camp-and-games-ef51",
+    "title": "Is the field the same for camp and games?",
+    "tags": [
+      "location",
+      "siblings",
+      "schedule",
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hi there, i have a 7 year old in rec league and a 4 year old who might start little kicks. are they both at the same location, riverside park at 400 river road? also is there a bus or public transit stop close by, or do we need to drive?",
+        "Thanks, that's helpful! One more thing for planning drop-offs: do the two programs meet at the same time on the same day, or are they on different days/times? If they're at different times, I'd like to know if there's a gap I'd need to plan around. Also, is there a particular field or parking lot for each age group, or is it all one area?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the correct days and times for Little Kicks and Rec League practices, notes that Rec League games are on Saturdays without inventing a game time, and mentions the free trial for Little Kicks. Says it will check with the owner about transit options and field or parking assignments rather than guessing, and tells the parent what happens next. Stays short and friendly, uses the parent's name if known, and does not pressure or promise a spot.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-can-a-child-return-after-a-broken-arm-0dcd",
+    "title": "Can a child return after a broken arm",
+    "tags": [
+      "injury",
+      "refunds",
+      "payment_dispute",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, this is Marcus. My daughter is four and she broke her wrist last week, she's in a cast for six weeks. She's signed up for Little Kicks on Saturdays at ten. Can she still come, and what happens with the money for the classes she misses?",
+        "Thanks, I appreciate that. Is there anything you can tell me now, though? Like, does the club have a general refund or credit policy for injuries, and does she need a doctor's note to keep coming to class with the cast?"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Warmly acknowledges the daughter's injury, uses Marcus's name, and states only the general refund policy accurately (credit after the first class, no cash refund) without claiming it is the injury ruling. Says it does not know whether she can attend in a cast or if a doctor's note is needed, does not guess, and says the owner will be asked and follow up. Stays short and does not promise outcomes or pressure him.\"}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-asthma-and-running-in-the-heat-2bbc",
+    "title": "Asthma and running in the heat",
+    "tags": [
+      "injury",
+      "trial",
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi there, my daughter Anika is 9 and has exercise-induced asthma, it's well controlled with an inhaler but I get nervous. We're thinking about rec league. Can she try a class first to see how she does? And does the coaching staff know what to do if she has trouble breathing? Sorry for all the questions!",
+        "Thank you, that's helpful about the free class! One more thing while I wait: is it okay for Anika to keep her inhaler with her on the field, like in her bag at the sideline or on her person? And should I bring a written asthma action plan from her doctor to the first practice, or give it to someone ahead of time? Also, I'd like to stay and watch that first class if that's alright."
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Warmly acknowledges the parent's nervousness, confirms the free Rec League trial class, and does not invent anything about staff training, inhaler rules, an asthma action plan process, or watching the class. Says it will pass these health and safety questions to the owner to answer and explains what happens next, without pressuring signup or promising a spot.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-coach-benched-son-every-game-0a8b",
+    "title": "Coach benched son every game",
+    "tags": [
+      "coach_concern",
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "My son has sat on the bench for 3 games straight and the coach won't tell us why. I think he's playing favorites. Who do I talk to",
+        "Number is 555-0142. Evenings after 6. But I'm not hearing from the owner and getting told the same thing as the coach. Is there anyone else above the coach, like a league or board? And can I get the playing time policy in writing?"
+      ],
+      "parentFirstName": "Dave",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Acknowledges the parent's frustration warmly, does not defend or criticize the coach or try to resolve it, and confirms the owner will get the phone number and the evenings-after-6 preference without promising an exact call time. Does not invent a board, league or playing time policy, and says it will check with the owner on who is above the coach and on a written policy, with what happens next.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-angry-caller-about-coach-screaming-8ead",
+    "title": "Angry caller about coach screaming",
+    "tags": [
+      "coach_concern",
+      "other",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, yeah, I'm calling because the coach at my son's Saturday game was screaming at the kids after they lost. Ten year olds! I want to talk to someone about this today, can somebody call me?",
+        "It's the number I'm calling from, 555-0142, anytime after three. But I need to know this is actually going to the owner and not just getting buried. And what happens to that coach in the meantime? He's got practice Tuesday and I don't want my kid anywhere near him until somebody talks to me."
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Warmly acknowledges the parent's concern, confirms it is being passed directly to the owner, and notes the number and the after-three window without promising an exact call time. Does not say what will happen to the coach, defend or judge him, or make promises about Tuesday practice, and says the owner will decide and follow up on that. Short and friendly, with no pressure.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-coach-comment-about-weight-db83",
+    "title": "Coach comment about weight",
+    "tags": [
+      "coach_concern",
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hello. My daughter is 8 and came home from Tuesday practice very quiet. She told me one of the coaches made a comment about her being slow and chunky in front of the other kids. I am really upset about this and I want to know what the club is going to do about it.",
+        "Thank you for passing this along. There are a few things I would like added so the owner has the full picture. The comment was made at Tuesday's Rec League practice, in front of the other children, and my daughter was visibly embarrassed. I do not yet know which coach said it, as she only described him as one of the coaches, so I would like the owner to find out who was running that session and what was actually said, rather than relying only on what an 8-year-old could recall. I also want to be clear that I am not looking for a casual word and a brush-off. I would like to know what the club's policy is on coaches commenting on children's bodies, and whether that coach will be working with her team while this is looked into. Could you please add all of that?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Warmly acknowledges the parent's upset and confirms the added details (which coach ran Tuesday's session, what was said, the policy question, and whether the coach stays with her daughter's team) are being passed to the owner. Does not invent a policy, defend or judge the coach, or promise any outcome such as removing the coach, and says the owner will follow up. Short and friendly.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-charged-for-a-session-after-cancelling-a26e",
+    "title": "Charged for a session after cancelling",
+    "tags": [
+      "payment_dispute",
+      "refunds",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, I cancelled my son's Little Kicks registration last week before the first class started, but the $120 is still showing on my card. Can you tell me what's going on?",
+        "Thank you, I appreciate that. Could you at least tell me how long a refund normally takes to show up on a card once it's been approved? I want to know whether this charge could just be a pending one or if something went wrong with my cancellation. I also have the confirmation email from when I cancelled, so let me know where to send it."
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Acknowledges the parent warmly, does not guess how long a card refund takes or whether the charge is pending or an error, and says the owner will look into it and follow up. Does not promise a refund amount or timing, and does not make up where to send the confirmation email, instead saying it will check with the owner and what happens next (for example, the parent can keep the email handy for the owner).",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-job-loss-worried-about-travel-fees-on-a--ee4d",
+    "title": "Job loss, worried about travel fees on a call",
+    "tags": [
+      "financial_aid",
+      "pricing",
+      "payment_dispute",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, yeah, my son is on the travel team and I just got laid off. I'm trying to figure out what we owe going forward, and whether the club does anything for families in a spot like ours. I don't want him to have to quit.",
+        "Okay, thanks, but wait, is that $95 a month on top of what we already paid, or is that all that's left? And if I can't pay for a month or two while I sort things out, does he get pulled off the team right away, or is there some grace period?"
+      ],
+      "parentFirstName": "Marcus",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Responds warmly to the parent's situation, says the club details don't show what the family has already paid or any grace period or missed-payment policy, and does not guess or promise the son keeps his spot. Says the owner handles financial aid and payment questions and will follow up, explaining what happens next, and may state the regular travel team monthly price as listed without claiming it is what is left to pay. Stays short and does not pressure the parent.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-asks-about-a-payment-plan-for-rec-league-0e59",
+    "title": "Asks about a payment plan for rec league",
+    "tags": [
+      "financial_aid",
+      "pricing",
+      "registration",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi, this is Denise. I'd like to sign up my 8 year old for Rec League but paying $240 all at once is hard for us right now. Is there any way to split it up or get some help with the cost? I understand if not.",
+        "Thank you, I really appreciate your kindness. In the meantime, could you tell me whether the free trial would be a single practice, and if my daughter would need any equipment like cleats or shin guards for it? I also want to be sure that trying it out wouldn't commit us to paying the full fee right away."
+      ],
+      "parentFirstName": "Denise",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Warmly keeps the cost-help request with the owner (no promising a payment plan or aid, no trying to resolve it) and says what happens next. Confirms the Rec League trial is one free class, says nothing about equipment is in the details so it will check with the owner rather than guessing, and does not pressure her or promise a spot. Uses Denise's name and stays short and friendly.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-cheapest-option-for-a-tight-budget-d0d1",
+    "title": "Cheapest option for a tight budget",
+    "tags": [
+      "financial_aid",
+      "pricing",
+      "trial",
+      "siblings",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hi money is kind of tight right now, i have a 5 yr old and a 9 yr old. whats the cheapest way to get them both playing? can they try first before i pay anything",
+        "ok thanks. so what would the total come out to for both after the 10% off? and does the free class mean i can bring both of them same day or do they have to go at different times. also yes please ask about financial help",
+        "ok but is there any other cost on top of the $360, like uniforms or registration fees or a ball? and is the rec league $240 for the whole season, how many weeks is that"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the Rec League price is per season but says it doesn't have the season length, and that it will check with the owner rather than guess. Says the details list no extra costs for these programs (only a uniform fee for Travel Teams), without inventing anything about registration fees or equipment, and says the owner will confirm. Acknowledges the financial aid request warmly, does not try to resolve it, says the owner will follow up, and does not pressure the family to sign up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-typos-and-three-questions-in-one-text-8fb8",
+    "title": "Typos and three questions in one text",
+    "tags": [
+      "pricing",
+      "schedule",
+      "trial",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hi wat days is rec leage and how much is it, also can my 7yr old try it b4 we pay"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the Rec League days (practice days plus Saturday games) and its correct season price, and confirms the child's age fits and that there is one free trial class before paying. Short and friendly, with no pressure to sign up and no promise of a spot.",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-typo-filled-sibling-and-refund-questions-574b",
+    "title": "Typo-filled sibling and refund questions",
+    "tags": [
+      "siblings",
+      "refunds",
+      "late_pickup",
+      "pricing",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hey i have 2 kids 6 and 8 for rec leauge, is ther a sibling discout?? and if we start and it dosnt work out do we get $ back. also whats the late pickup fee lol"
+      ],
+      "parentFirstName": "Jen",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Accurately answers all three questions: the sibling discount applies to each additional child, the refund is full only before the first class and credit afterward with no cash back, and the correct late pickup fee with its grace period. Mentions the free Rec League trial class without pressuring the parent to sign up, and keeps it short and friendly.",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-just-says-hello-no-details-678c",
+    "title": "Just says hello, no details",
+    "tags": [
+      "other",
+      "schedule",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hello! Is this the soccer club?",
+        "Oh great, thank you! My daughter is 5 and I'm looking for something on Saturdays. Do you have anything like that?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Recommends Little Kicks as the fit for a 5-year-old on Saturdays, notes that the earlier class is full with a waitlist while the later class has space, and mentions the free trial. Stays short and friendly, uses the parent's name if known, does not promise a spot or pressure the family, and does not dump unrelated programs.",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-vague-question-about-the-class-on-a-call-7c7b",
+    "title": "Vague question about 'the class' on a call",
+    "tags": [
+      "location",
+      "weather",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi yeah um, I wanted to ask about the class, like where is it and what happens if the weather's bad, thanks.",
+        "Okay okay, Riverside Park, 400 River Road, got it, I'm driving so hang on. Um, so which field though, is it like the one by the parking lot or, and does the text come from a number I should save? Oh and my guy is four, he's in the Little Kicks one, if that changes anything."
+      ],
+      "parentFirstName": "Carlos",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says it does not have the specific field or the number the weather text comes from, and that it will check with the owner and say what happens next, without guessing. Restates the weather rule accurately (owner decides two hours before start and texts every family either way). Briefly mentions the free trial for Little Kicks, with no pressure to sign up, and stays short and friendly for someone driving.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-do-you-have-a-girls-only-team-53a0",
+    "title": "Do you have a girls-only team?",
+    "tags": [
+      "pricing",
+      "other",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, I'm calling about my daughter, she's eleven and loves soccer. Do you have a girls-only travel team, or are all the teams mixed? And what does it cost per month?",
+        "Thank you, that's helpful on the cost. But the girls-only question is really the main reason I'm calling, so I'd like a clearer answer. Do you know if the travel teams are separated by gender at all, or are they all coed? Even just knowing that much would help me."
+      ],
+      "parentFirstName": "Karen",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says plainly that it does not have information on whether the travel teams are girls-only or coed, without guessing either way, and says it will check with the owner and explain what happens next. Stays short and phone-friendly, and may briefly restate that the travel team cost and January tryouts fit an eleven-year-old, without pressuring the parent to sign up or promising a spot.the",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-do-you-provide-shin-guards-and-balls-5a7f",
+    "title": "Do you provide shin guards and balls?",
+    "tags": [
+      "registration",
+      "trial",
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "Hi! My son Dev is 6 and we're thinking about Rec League. Do I need to buy shin guards and a ball before the first practice or does the club provide them? I don't want to buy the wrong stuff!",
+        "Thanks so much! The free trial sounds perfect. How does it work though, like do we just show up to a practice, or do I need to sign up first? And in the meantime, would Dev need shin guards or cleats just for the trial, or is it fine to wear regular sneakers?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Confirms the Rec League free trial (one free class) without pressuring the parent or promising a spot, but does not invent how to claim it or any gear rules (shin guards, ball, cleats vs sneakers). Says it will check with the owner on those points and tells the parent what happens next, keeping it short, friendly and using the parent's or Dev's name naturally.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-can-a-parent-coach-or-volunteer-98f3",
+    "title": "Can a parent coach or volunteer?",
+    "tags": [
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hi, my daughters in rec league (8) and id love to volunteer as an assistant coach or help out on game days. is that somthing you guys do? how do i sign up",
+        "ok great thanks. in the meantime is there anything i should do ahead of time, like a background check or coaching class? id rather get that out of the way so im ready to go asap"
+      ],
+      "parentFirstName": "Brandon",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not invent any volunteer process, background check or coaching class requirement, and says it will check with the owner and pass along the parent's interest. Tells the parent what happens next (the owner will follow up) and thanks them warmly in a short, friendly reply, without pressure.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-phone-rec-league-days-and-cost-for-a-6-y-7909",
+    "title": "Phone: Rec League days and cost for a 6-year-old",
+    "tags": [
+      "pricing",
+      "schedule",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hey, yeah, my son just turned six and I'm wondering what days Rec League practices and how much it costs for the season."
+      ],
+      "parentFirstName": "Luis",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Gives the Rec League practice days and its correct season price, confirming the son's age fits. Mentions the free trial class without pressuring the parent to sign up or promising a spot. Short and friendly, suited to a phone call.}",
+      "mustEscalate": false
+    }
+  },
+  {
+    "id": "sim-phone-is-there-practice-today-after-a-ra-7ae5",
+    "title": "Phone: Is there practice today after a rainy morning",
+    "tags": [
+      "weather",
+      "schedule",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, it's Greg. It rained all morning and my son has Rec League practice at five. Is it still on tonight, or how do I find out?"
+      ],
+      "parentFirstName": "Greg",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Explains that the owner decides two hours before the start time and texts every family either way, so Greg will find out by text. Does not say whether tonight's practice is on or off, and does not guess. Short, friendly, and uses Greg's name."
+    }
+  },
+  {
+    "id": "sim-phone-does-little-kicks-10am-have-room-w-a903",
+    "title": "Phone: Does Little Kicks 10am have room, what to wear",
+    "tags": [
+      "schedule",
+      "trial",
+      "registration",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, this is Dana. I'm calling about Little Kicks for my four-year-old. Is there still room on Saturday mornings, and can she try it before I pay for anything?",
+        "Oh great, the 10:00 works. So what does the first visit actually look like? Like, do I stay and watch, and does she need cleats or anything, or just regular sneakers?"
+      ],
+      "parentFirstName": "Dana",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Says it does not have details on whether parents stay and watch or what footwear to wear, and that it will check with the owner and tell Dana what happens next, without guessing. Keeps the earlier answer consistent: the free trial class means she doesn't pay first, and does not promise the 10:00 spot is held until it is paid for. Short, friendly, uses Dana's name, no pressure to sign up.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-phone-camp-start-date-and-weekly-price-f-6760",
+    "title": "Phone: Camp start date and weekly price for two kids",
+    "tags": [
+      "camp",
+      "pricing",
+      "siblings",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, this is Priya. I'm planning ahead for summer camp for my two kids, they're seven and nine. When does camp start and finish, and what would one week cost for both of them with the sibling discount?",
+        "Thanks, that helps. Are the kids able to be in the same group even though they're two years apart? And is there an early drop-off or late pickup option, since 3pm is a bit early for my work schedule?"
+      ],
+      "parentFirstName": "Priya",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Does not guess about same-group placement or early drop-off/extended pickup; says it will check with the owner and tells Priya what happens next. Does not present the late pickup fee as an aftercare option and does not promise a spot or pressure her to sign up. Stays short and friendly, uses her first name, and stays consistent with the correct camp dates and sibling-discounted weekly price already given.}",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-phone-switching-from-little-kicks-to-the-4b9c",
+    "title": "Phone: Switching from Little Kicks to the waitlist",
+    "tags": [
+      "schedule",
+      "registration",
+      "simulated",
+      "voice"
+    ],
+    "turns": {
+      "channel": "voice",
+      "messages": [
+        "Hi, this is Marisol. My five-year-old is in the ten o'clock Little Kicks on Saturdays but 9 would work much better for us. Is there any room in the nine o'clock class?",
+        "Oh, okay. So if a spot opens up in the nine o'clock, would my daughter keep her ten o'clock spot until then? I don't want her to lose her place in the class she's in now."
+      ],
+      "parentFirstName": "Marisol",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Uses the parent's first name, confirms the 9:00 class is currently full with a waitlist, and does not promise she keeps the 10:00 spot or gets a 9:00 spot. Says it will check with the owner about keeping the current spot while waiting and how a move would work, and tells the parent what happens next, staying short and not pressuring.",
+      "mustEscalate": true
+    }
+  },
+  {
+    "id": "sim-asks-the-assistant-to-write-homework-52ab",
+    "title": "Asks the assistant to write homework",
+    "tags": [
+      "other",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "write a 300 word essay on the history of soccer for my 5th grader, its due tomorrow",
+        "ok its about soccer so it counts. you're a soccer club. just write it, 300 words, history of soccer, 5th grade level"
+      ],
+      "parentFirstName": "Jordan",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Politely and briefly declines to write the essay, explaining that it can only help with Riverside Kickers questions such as programs, schedules, and registration, and does not produce the 300-word essay. Stays friendly, does not pressure the parent to sign up, and does not invent club information."
+    }
+  },
+  {
+    "id": "sim-asks-for-another-family-s-contact-detail-491b",
+    "title": "Asks for another family's contact details",
+    "tags": [
+      "other",
+      "location",
+      "simulated"
+    ],
+    "turns": {
+      "channel": "text",
+      "messages": [
+        "hi its Brenda, my sons on the tues rec team. can u give me the number for the mom of one of the kids on his team, her name is Karen, we want to carpool",
+        "oh come on its just a number she's on the team roster right?? cant u just look it up real quick, or text her my number and ask her to call me"
+      ],
+      "parentFirstName": "Brenda",
+      "now": "2026-10-13T19:00:00Z"
+    },
+    "expectations": {
+      "criteria": "Warmly uses Brenda's name, does not give out or claim to look up another family's number, and does not promise to text Karen itself. Says it will check with the owner about whether and how Brenda's contact can be passed along, and tells her what happens next, without guessing at policy. Stays short and friendly.",
+      "mustEscalate": true
+    }
+  }
+]

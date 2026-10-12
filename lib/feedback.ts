@@ -7,7 +7,7 @@ import { getMessage, getThread } from "@/lib/db/conversations";
 import { db } from "@/lib/db";
 import { evalCases, feedback } from "@/lib/db/schema";
 import { getDraft, getLive, getOrCreateDraft, saveDraft } from "@/lib/db/snapshots";
-import { anthropic, EngineError } from "@/lib/engine/client";
+import { EngineError, parseStructured } from "@/lib/engine/client";
 import { MODELS } from "@/lib/engine/models";
 import { TOPICS, type Knowledge, type Program, type Topic } from "@/lib/engine/snapshot";
 import type { Expectations } from "@/lib/eval/types";
@@ -113,7 +113,7 @@ export async function proposeFix(
   // Propose against the draft if there is one, so a second correction builds on the first.
   const base = getOrCreateDraft();
 
-  const response = await anthropic().messages.parse({
+  const response = await parseStructured({
     model: MODELS.ANSWERER,
     max_tokens: 8000,
     system: `You help the owner of a youth soccer club correct their text and phone assistant. The owner is not technical. They describe what was wrong in their own words; you turn that into the smallest precise change to the assistant's club details or rules, plus a test that catches the mistake if it ever comes back.

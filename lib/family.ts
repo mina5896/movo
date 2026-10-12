@@ -6,7 +6,7 @@ import { getThread } from "@/lib/db/conversations";
 import { db } from "@/lib/db";
 import { families } from "@/lib/db/schema";
 import { getLive } from "@/lib/db/snapshots";
-import { anthropic } from "@/lib/engine/client";
+import { parseStructured } from "@/lib/engine/client";
 import { costOf, MODELS } from "@/lib/engine/models";
 import { STAGES, type FamilyProfile } from "@/lib/profile";
 
@@ -53,7 +53,7 @@ export async function updateProfile(threadId: string): Promise<void> {
   const programs = getLive().data.programs.map((p) => `- ${p.name} (ages ${p.ages})`).join("\n");
 
   try {
-    const response = await anthropic().messages.parse({
+    const response = await parseStructured({
       model: MODELS.CLASSIFIER,
       max_tokens: 2000,
       system: `You keep a short record of what a family has told a youth soccer club in a text or phone conversation, for the club owner. Record only what the parent actually said - never guess a name, age or number. A child's age can be inferred only from a clear statement ("she's turning 6"). Leave a field empty rather than guess. Refer to the parent by first name, never as he or she.`,

@@ -167,6 +167,8 @@ export const evalCases = sqliteTable(
     /** Random stratified split, drawn once - never selected by baseline score. */
     split: text("split", { enum: ["train", "test"] }).notNull().default("test"),
     active: integer("active", { mode: "boolean" }).notNull().default(true),
+    /** Written on the owner's request and waiting for them to keep or remove; never run until kept. */
+    pending: integer("pending", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull().default(now),
   },
   (t) => [index("eval_cases_active_idx").on(t.active)],

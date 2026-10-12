@@ -49,6 +49,18 @@ export function extractFigures(text: string): Figure[] {
   return out;
 }
 
+const WORD_NUMBERS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, ten: 10, fifteen: 15, twenty: 20, thirty: 30 };
+
+/** Durations stated in a text ("two hours before", "the first 10 minutes"), in minutes. */
+export function extractDurations(text: string): number[] {
+  const out: number[] = [];
+  for (const m of text.matchAll(/\b(\d{1,3}|one|two|three|four|five|ten|fifteen|twenty|thirty)[\s-]+(minutes?|mins?|hours?|hrs?)\b/gi)) {
+    const n = WORD_NUMBERS[m[1].toLowerCase()] ?? Number(m[1]);
+    out.push(/^h/i.test(m[2]) ? n * 60 : n);
+  }
+  return out;
+}
+
 /**
  * Prices the assistant may work out in one step from the club's own: several
  * weeks or months, a sibling's 10% off (and the 10% itself), a per-class
@@ -144,7 +156,20 @@ export function unsupportedFigures(reply: string, sources: GroundingSources): st
   const money = derivablePrices(has("money"), /\bminutes?\b|\blate\b/i.test(reply));
   const acceptedMoney = (v: number) => money.some((m) => Math.abs(m - v) < 0.01);
   const worked = shownWorking(reply, acceptedMoney);
+  // A time one duration before or after a known time: "a text by 8am" for a
+  // 10am class decided two hours before, "the fee starts at 6:25" after a
+  // 10-minute grace period. The duration must be in the sources and named in
+  // the reply itself, like shown working - otherwise "two hours" in a policy
+  // would let 7pm through for a 5pm practice.
+  const stated = new Set(sources.texts.flatMap(extractDurations));
+  const durations = [...new Set(extractDurations(reply))].filter((d) => stated.has(d));
   const times = new Set(has("time"));
+  for (const t of [...times]) {
+    for (const d of durations) {
+      times.add((t + d) % 720);
+      times.add((t - d + 720) % 720);
+    }
+  }
   const dates = new Set([...has("date"), ...sources.nearbyDays]);
   const percents = new Set(has("percent"));
 

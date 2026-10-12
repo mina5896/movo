@@ -3,7 +3,7 @@ import * as z from "zod";
 
 import { getMessage, getThread } from "@/lib/db/conversations";
 import { getOrCreateDraft } from "@/lib/db/snapshots";
-import { anthropic } from "@/lib/engine/client";
+import { parseStructured } from "@/lib/engine/client";
 import { MODELS } from "@/lib/engine/models";
 import { formatKnowledge } from "@/lib/eval/graders/judge";
 import { proposeFix } from "@/lib/feedback";
@@ -56,7 +56,7 @@ export async function suggestLesson(ownerMessageId: string): Promise<void> {
     .join("\n\n");
 
   try {
-    const response = await anthropic().messages.parse({
+    const response = await parseStructured({
       model: MODELS.JUDGE,
       max_tokens: 3000,
       system: `A youth soccer club's assistant handed a parent's question to the club's owner, and the owner answered it. Decide whether the owner's answer teaches the assistant something it could tell any family next time.
