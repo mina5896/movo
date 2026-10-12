@@ -71,7 +71,7 @@ Measured costs: about $0.01–0.02 per parent message, plus about $0.006 for its
 - **Rolling back to an earlier version.** Old snapshots are kept (archived) but there's no button to restore one.
 - **Train/test split.** The schema has it, but with about 30 tests and no automated prompt tuning there's nothing to overfit yet.
 - **Tools: reading the club's own systems** (registration, a Google Drive roster, payments). Today the assistant's only action is handing a conversation to the owner. The club details are small enough to send in full on every turn, so it has nothing to look up. Member data is the risky part: over SMS we can't confirm who is texting, so "is my son registered?" could hand a child's details to a stranger. When it's added:
-  - verify the parent's phone number first;
+  - verify who the parent is first: on the web, they're signed in to the club's account; by text or phone, their number matches the one on the registration, plus a one-time code before anything sensitive;
   - read-only tools, limited to that parent's own family;
   - anything that changes data (a refund, a roster change) becomes a request the owner approves;
   - every tool call is logged in the thread, and each tool gets its own tests.
