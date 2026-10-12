@@ -7,10 +7,12 @@ import { getById, type SnapshotRow } from "@/lib/db/snapshots";
 import { answer, type AnswerResult, type Turn } from "@/lib/engine/answer";
 import { EngineError } from "@/lib/engine/client";
 import { costOf, MODELS, type Usage } from "@/lib/engine/models";
+import type { Topic } from "@/lib/engine/snapshot";
 
 import { SEED_CASES } from "./cases";
 import { deterministicScores } from "./graders/deterministic";
 import { GRADER_VERSION, judge } from "./graders/judge";
+import { changeReaches } from "./reach";
 import { verdict, type CaseChange, type CaseOutcome } from "./verdict";
 import { AXES, overallPass, type Axis, type CaseTurns, type Expectations, type Scores } from "./types";
 
@@ -246,9 +248,25 @@ export function summarize(runId: string): RunSummary {
 export type { CaseChange, CaseOutcome };
 export type Comparison = { changes: CaseChange[]; same: number };
 
-function compare(liveId: string, draftId: string): Comparison {
+/** The topics of every turn each attempt at a case took, on one run. */
+function turnTopics(runId: string): Map<string, Topic[][]> {
+  const out = new Map<string, Topic[][]>();
+  for (const r of db.select().from(evalResults).where(eq(evalResults.runId, runId)).all()) {
+    const turns = (r.trajectory as { turns?: { topics?: Topic[] }[] } | null)?.turns ?? [];
+    const list = out.get(r.caseId) ?? [];
+    list.push(...turns.map((t) => t.topics ?? []));
+    out.set(r.caseId, list);
+  }
+  return out;
+}
+
+export function compare(liveId: string, draftId: string): Comparison {
   const live = summarize(liveId).perCase;
   const draft = summarize(draftId).perCase;
+  const before = getById(getRun(liveId)!.snapshotId)!.data;
+  const after = getById(getRun(draftId)!.snapshotId)!.data;
+  const liveTopics = turnTopics(liveId);
+  const draftTopics = turnTopics(draftId);
   const ids = new Set([...Object.keys(live), ...Object.keys(draft)]);
   const changes: CaseChange[] = [];
   let same = 0;
@@ -257,8 +275,13 @@ function compare(liveId: string, draftId: string): Comparison {
     const d = draft[id] ?? null;
     if (!l || !d) continue;
     const v = verdict(l, d);
-    if (v === null) same++;
-    else changes.push({ caseId: id, live: l, draft: d, verdict: v });
+    if (v === null) {
+      same++;
+      continue;
+    }
+    const topics = [...(liveTopics.get(id) ?? []), ...(draftTopics.get(id) ?? [])];
+    const untouched = !changeReaches(before, after, topics);
+    changes.push({ caseId: id, live: l, draft: d, verdict: untouched ? "unsteady" : v, ...(untouched ? { untouched } : {}) });
   }
   const order = { worse: 0, unsteady: 1, better: 2 };
   changes.sort((a, b) => order[a.verdict] - order[b.verdict]);
@@ -352,7 +375,8 @@ export function startComparison(liveId: string, draftId: string): { liveRunId: s
     });
 
     const first = compare(liveRunId, draftRunId);
-    const changed = cases.filter((c) => first.changes.some((ch) => ch.caseId === c.id));
+    // Tests the change doesn't reach need no more tries: nothing there can be its fault.
+    const changed = cases.filter((c) => first.changes.some((ch) => ch.caseId === c.id && !ch.untouched));
     const confirm = changed.flatMap((c) =>
       Array.from({ length: CONFIRM_REPS }, (_, i) => [
         { c, side: "live" as const, rep: i + 1 },

@@ -3,6 +3,7 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 import { answer, type AnswerResult, type Turn } from "@/lib/engine/answer";
 import type { Topic } from "@/lib/engine/snapshot";
+import { getProfile, type FamilyProfile } from "@/lib/profile";
 
 import { db } from "./index";
 import { activeNotices, toNotice } from "./notices";
@@ -19,7 +20,13 @@ export type ThreadSummary = {
   status: ThreadStatus;
   attentionReason: string | null;
   lastMessageAt: number;
-  family: { id: string; parentFirstName: string; parentLastName: string | null; phone: string | null };
+  family: {
+    id: string;
+    parentFirstName: string;
+    parentLastName: string | null;
+    phone: string | null;
+    profile: FamilyProfile | null;
+  };
   lastMessage: { body: string; role: MessageRow["role"]; channel: Channel } | null;
   channels: Channel[];
   /** Replies the reviewer flagged that the owner hasn't looked at yet, newest first. */
@@ -116,6 +123,7 @@ export function listThreads(): ThreadSummary[] {
         parentFirstName: family.parentFirstName,
         parentLastName: family.parentLastName,
         phone: family.phone,
+        profile: getProfile(family.profile),
       },
       lastMessage: last ? { body: last.body, role: last.role, channel: last.channel } : null,
       channels,
@@ -243,7 +251,7 @@ export async function handleParentMessage(
 export function postOwnerReply(threadId: string, body: string, channel: Channel = "text"): MessageRow {
   const msg = insertMessage({ id: randomUUID(), threadId, role: "owner", channel, body });
   db.update(threads)
-    .set({ status: "open", attentionReason: null })
+    .set({ status: "open", attentionReason: null, ownerDraft: null })
     .where(eq(threads.id, threadId))
     .run();
   return msg;

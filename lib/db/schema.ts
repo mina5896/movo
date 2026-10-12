@@ -46,6 +46,12 @@ export const families = sqliteTable("families", {
   parentLastName: text("parent_last_name"),
   phone: text("phone"),
   notes: text("notes"),
+  /**
+   * JSON: what the parent has told us about their family (children, ages,
+   * interest, a trial), kept up to date after each message. Only what they
+   * said, never looked up elsewhere. See lib/family.ts.
+   */
+  profile: text("profile", { mode: "json" }),
   createdAt: integer("created_at").notNull().default(now),
 });
 
@@ -68,6 +74,12 @@ export const threads = sqliteTable(
     /** Why the assistant handed this to a human, when it did. */
     attentionReason: text("attention_reason"),
     subject: text("subject"),
+    /**
+     * JSON: a reply drafted for the owner when the assistant hands a
+     * conversation over, so they edit and send rather than start from a blank
+     * box. See lib/owner-draft.ts.
+     */
+    ownerDraft: text("owner_draft", { mode: "json" }),
     createdAt: integer("created_at").notNull().default(now),
     lastMessageAt: integer("last_message_at").notNull().default(now),
   },
@@ -114,6 +126,14 @@ export const feedback = sqliteTable("feedback", {
     .notNull()
     .references(() => messages.id),
   ownerNote: text("owner_note").notNull(),
+  /**
+   * correction: the owner said a reply was wrong. teach: the owner answered a
+   * handed-over question themselves, and the answer is something every family
+   * could be told, so the assistant can answer it next time.
+   */
+  kind: text("kind", { enum: ["correction", "teach"] }).notNull().default("correction"),
+  /** teach only: the owner's message the lesson came from. */
+  ownerMessageId: text("owner_message_id").references(() => messages.id),
   /** JSON: the change and test proposed from the note, shown to the owner before anything is applied. */
   proposal: text("proposal", { mode: "json" }),
   /** applied: in the draft, not yet live. published: parents get it. */

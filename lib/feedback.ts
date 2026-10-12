@@ -84,14 +84,30 @@ function parentScript(threadId: string, messageId: string): { messages: string[]
  * smallest change to the club details or rules, plus a test pinned to the
  * conversation that went wrong. Nothing is applied until the owner approves.
  */
-export async function proposeFix(messageId: string, ownerNote: string): Promise<FeedbackRow> {
+export async function proposeFix(
+  messageId: string,
+  ownerNote: string,
+  teach?: { ownerMessageId: string },
+): Promise<FeedbackRow> {
   const msg = getMessage(messageId);
   if (!msg || msg.role !== "assistant") throw new Error("can only correct an assistant reply");
   const thread = getThread(msg.threadId)!;
   const idx = thread.messages.findIndex((m) => m.id === messageId);
+  // A lesson from the owner's own reply needs that reply in view as well.
+  const end = teach ? thread.messages.findIndex((m) => m.id === teach.ownerMessageId) + 1 : idx + 1;
   const context = thread.messages
-    .slice(Math.max(0, idx - 6), idx + 1)
-    .map((m) => `${m.role.toUpperCase()}${m.id === messageId ? " (the reply being corrected)" : ""}: ${m.body}`)
+    .slice(Math.max(0, idx - 6), Math.max(end, idx + 1))
+    .map((m) => {
+      const tag =
+        m.id === messageId
+          ? teach
+            ? " (handed to the owner)"
+            : " (the reply being corrected)"
+          : m.id === teach?.ownerMessageId
+            ? " (the owner's own reply)"
+            : "";
+      return `${m.role.toUpperCase()}${tag}: ${m.body}`;
+    })
     .join("\n\n");
 
   // Propose against the draft if there is one, so a second correction builds on the first.
@@ -130,7 +146,14 @@ ${ownerNote}`,
 
   const id = randomUUID();
   db.insert(feedback)
-    .values({ id, messageId, ownerNote, proposal: response.parsed_output, status: "pending" })
+    .values({
+      id,
+      messageId,
+      ownerNote,
+      proposal: response.parsed_output,
+      status: "pending",
+      ...(teach ? { kind: "teach" as const, ownerMessageId: teach.ownerMessageId } : {}),
+    })
     .run();
   return getFeedback(id)!;
 }

@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { listThreads } from "@/lib/db/conversations";
+import { isLead, profileLine, stageLabel } from "@/lib/profile";
 
 import { AutoRefresh } from "./_components/auto-refresh";
 import { Card, Pill, timeAgo } from "./_components/ui";
@@ -65,8 +66,14 @@ function List({ threads }: { threads: ReturnType<typeof listThreads> }) {
               {t.channels.includes("text") && <Pill>💬 text</Pill>}
               {t.channels.includes("voice") && <Pill>📞 call</Pill>}
               {t.status === "resolved" && <Pill tone="good">resolved</Pill>}
+              {t.family.profile && t.family.profile.stage !== "just_asking" && (
+                <Pill tone={isLead(t.family.profile) ? "good" : undefined}>{stageLabel(t.family.profile.stage)}</Pill>
+              )}
               <span className="ml-auto text-xs text-[var(--muted)]">{timeAgo(t.lastMessageAt)}</span>
             </div>
+            {t.family.profile && profileLine(t.family.profile) && (
+              <p className="mt-0.5 text-xs text-[var(--muted)]">{profileLine(t.family.profile)}</p>
+            )}
             {t.attentionReason && <p className="mt-0.5 text-sm text-[var(--danger)]">{t.attentionReason}</p>}
             {t.flagged.length > 0 && (
               <p className="mt-0.5 text-sm text-[var(--warn)]">

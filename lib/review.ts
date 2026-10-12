@@ -36,7 +36,8 @@ export type Review = {
 
 export const AUTO_REVIEW = process.env.MOVO_AUTO_REVIEW !== "off";
 
-const Verdict = z.object({ ok: z.boolean(), reason: z.string() });
+// Reason before verdict, so the verdict follows from the reasoning.
+const Verdict = z.object({ reason: z.string(), ok: z.boolean() });
 const ReviewSchema = z.object({
   correct: Verdict.describe(
     "Every fact matches the club details. Nothing invented: no guessed prices, dates, times, availability or policies.",

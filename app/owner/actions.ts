@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import * as z from "zod";
 
 import { postOwnerReply, setThreadStatus } from "@/lib/db/conversations";
@@ -21,14 +22,20 @@ import { saveLabel } from "@/lib/eval/calibration";
 import { setCaseActive, startComparison, startRun } from "@/lib/eval/runner";
 import { approveFix, dismissFix, markFixesDiscarded, markFixesPublished, proposeFix } from "@/lib/feedback";
 import { resolveReview } from "@/lib/review";
+import { hasBlanks } from "@/lib/blanks";
+import { suggestLesson } from "@/lib/teach";
 
 // No auth: this is a local single-owner demo (see DECISIONS.md). Every action
 // still validates its input, since server actions are reachable by direct POST.
 
-export async function replyAction(threadId: string, body: string) {
+export async function replyAction(threadId: string, body: string): Promise<{ error?: string }> {
   const text = z.string().trim().min(1).max(2000).parse(body);
-  postOwnerReply(threadId, text);
+  if (hasBlanks(text)) return { error: "Fill in the [blanks] first." };
+  const msg = postOwnerReply(threadId, text);
+  // If the answer is something every family could be told, offer to teach it.
+  after(() => suggestLesson(msg.id));
   refresh();
+  return {};
 }
 
 export async function setStatusAction(threadId: string, status: "open" | "needs_attention" | "resolved") {

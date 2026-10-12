@@ -6,6 +6,8 @@ export type CaseChange = {
   draft: CaseOutcome | null;
   /** worse/better: consistent across the confirming attempts. unsteady: mixed results. */
   verdict: "worse" | "better" | "unsteady";
+  /** The change doesn't reach this test (see reach.ts), so any difference is variation, never "worse". */
+  untouched?: boolean;
 };
 
 /**

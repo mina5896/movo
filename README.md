@@ -22,7 +22,7 @@ npm run dev
 ## A tour for the owner
 
 1. **Talk to it as a parent** at `/`. Try the hard ones: "info?", "Coach Mike yelled at my daughter", "can someone just call me". Switch to a call partway through; it remembers the texts.
-2. **Inbox** (`/owner`): conversations that need you come first. That means ones the assistant handed to you, with the reason, and ones holding a reply the second-model review doubts. Reply yourself; the parent sees it in the same chat.
+2. **Inbox** (`/owner`): conversations that need you come first. That means ones the assistant handed to you, with the reason, and ones holding a reply the second-model review doubts. Each shows what the family told us (children, programs, "wants a trial"). When the assistant hands one over, a reply is drafted for you: *Use this draft*, fill in the [blanks], send. If your answer is something any family could be told, it offers *Teach the assistant this?*, so the same question stops coming to you.
 3. **Fixing a reply.** On a flagged reply click *Fix it*: the correction is pre-written, edit it if you like. On any other reply, *Something wrong with this reply?* does the same. You'll see the proposed fix and a new test in plain words. *Looks right - check it* adds it to your unpublished changes and starts the before/after check; when it says *Safe to publish*, publish from right there.
 4. **Notices** (top of `/owner/club`): post tonight's weather call or a field closure. The assistant knows it immediately, and it disappears at the end of the day unless you pick longer.
 5. **Club details & rules** (`/owner/club`): edit prices, schedules and rules. Changes save as a draft. *Try your changes* on the right, then *Check how this changes answers*: every test conversation is replayed on the current version and on your change, and anything that got worse is shown side by side. Then publish.
@@ -32,7 +32,7 @@ npm run dev
 
 | | |
 |---|---|
-| `npm test` | Unit tests for the code that doesn't need a model: the figure check, topic scoping, grading, the before/after verdict, club time. Free and instant |
+| `npm test` | Unit tests for the code that doesn't need a model: the figure check, topic scoping, grading, the before/after verdict and which tests a change reaches, club time, the family card. Free and instant |
 | `npm run smoke` | Four of the brief's example messages through the real engine |
 | `npm run eval` | A full check of the live assistant, with failures printed |
 | `npx tsx --env-file-if-exists=.env.local scripts/feedback-check.ts <messageId> <note…>` | The correction loop from the command line: propose, approve, compare |
@@ -45,4 +45,5 @@ Each of these calls the API and costs money (smoke about $0.05, eval about $0.20
 - `lib/db/` – schema, snapshots (draft/live/archived), conversations.
 - `lib/eval/` – test cases, graders, runner, before/after comparison, grader calibration.
 - `lib/feedback.ts` – a plain-words correction becomes a proposed change and a test.
+- `lib/review.ts`, `lib/owner-draft.ts`, `lib/teach.ts`, `lib/family.ts` – work done after a message: the second-model review, the owner's drafted reply, lessons from the owner's answers, the family card.
 - `app/` – parent chat (`/`), owner pages (`/owner`), API routes for the parent chat.

@@ -110,6 +110,12 @@ function Comparison({
                 return (
                   <Card key={ch.caseId} className="p-4">
                     <CaseHeader c={cases.get(ch.caseId)} />
+                    {ch.untouched && (
+                      <p className="mb-2 text-xs text-[var(--muted)]">
+                        Your change doesn&apos;t reach this test: the assistant was given exactly the same details and rules before
+                        and after, so the difference is normal variation, not your change.
+                      </p>
+                    )}
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
                         <p className="mb-1 text-xs font-semibold text-[var(--muted)]">

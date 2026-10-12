@@ -17,6 +17,7 @@ Build order:
 7. **Grader spot-check**, so the owner knows how far to trust the scores.
 8. **Less work for the owner**: every real reply is double-checked by a second model, and approving a fix starts the check on its own.
 9. **Today's date, owner notices, and a figure check in code** before any reply is sent.
+10. **Fewer handoffs over time**: a drafted reply for the owner, and "teach the assistant this" from the owner's own answers. A family card from what each parent said.
 
 ## Key decisions
 
@@ -43,9 +44,17 @@ Found when the date was added: the club details say camp is "June 21 to August 1
 
 **Every price, time and date is checked in code before a reply is sent.** Each figure in a reply must appear in the club details, a notice, the conversation, or the days around today. A few one-step calculations are also allowed (several weeks, 10% off a sibling, a per-class price). A longer total is accepted only when the reply shows the working and the sum is right ("$930 + $837 = $1,767"). If the first draft fails, the assistant rewrites it once with the problem named, which usually just means showing the working. A figure that still fails goes to the owner as a flagged reply. The allowed calculations are deliberately narrow: summing every pair of the club's prices would have let 1,700 of the first 2,000 dollar amounts through. Unit tests cover the cases.
 
+**Handoffs should shrink over time, not stay the owner's job forever.** When the assistant hands a conversation over, Claude Sonnet 5.5 drafts the owner's reply from the club details. Anything only the owner knows or decides goes in as a [blank], and the reply can't be sent until every blank is filled in, so the draft never puts a guess in the owner's mouth. After the owner replies, a second step asks whether the answer is something any family could be told ("shin guards are required") or a decision for this one family (a refund). Only the first kind is offered as "Teach the assistant this?". It becomes a proposed change and a test, through the same check and publish as a correction. A refund decision in testing was correctly left alone.
+
+**A family card, from what the parent said.** After each parent message, Claude Haiku 5.5 re-reads the conversation and records the children's first names and ages, the programs they asked about, whether they want a trial, any contact details they gave, and one line to remember. The owner sees it on the conversation, and the inbox shows "wants a trial" so follow-ups don't get lost. It holds only what the parent said, never health details, and nothing looked up elsewhere. It isn't fed back to the assistant: the assistant already reads the whole conversation, so the card would add nothing but a second copy that could drift.
+
 **Before/after checks confirm changes before reporting them.** Both versions answer every test once. Any test whose result differs gets two more tries on each side. It's reported as "got worse" only if it consistently passes before and fails after, otherwise as "mixed". Without this, ordinary variation in wording would cry wolf. A full check costs about $0.70 and takes about 4 minutes.
 
+**A change can only be blamed for tests it reaches.** Found when teaching the assistant about shin guards: the check said "Hold on, 2 answers got worse", and neither was about gear. The new rule wasn't even in their prompts. Each test now records the topics of every turn. If the details and rules for those topics come out word for word the same before and after the change, the change can't have caused a difference there. It's reported as variation, with a note saying so, and gets no re-tries. This is computed, not judged, and costs nothing.
+
 **Grading: hard checks first, then a judge.** "Did it hand off" and "did it say a banned phrase" are checked in code and override the judge. A different model (Claude Sonnet 5.5) grades correctness against the snapshot under test, rule-following, handoff, tone, and the test's own expectation. Facts that change (prices, dates) are judged against the snapshot, not hard-coded in tests, so a price change doesn't break the tests. Plumbing failures go in a separate table and are never averaged in as wrong answers.
+
+**The grader has to show its evidence** (v3). The first version decided pass/fail first and explained after, and sometimes failed an answer while its own reason said "the real issue is none". Now it reasons before deciding, and "correct" fails only when it quotes a specific statement the club details don't support. A second, narrower call then checks each quoted statement on its own, and only confirmed ones count. That call only happens when something was quoted. On the live assistant, "correct" went from 33/35 to 36/36, and the before/after check on the gear lesson went from "Hold on" to "Safe to publish". The remaining failure is a real one (the assistant handing off a question about shy kids it could have answered). Each run records its grader version, so scores from different graders aren't mixed up.
 
 **The owner calibrates the grader.** The spot-check page shows a graded answer without the verdict, asks the owner for their own call, then reveals the grader's verdict. The agreement rate is shown next to the scores.
 
@@ -55,10 +64,11 @@ Found when the date was added: the club details say camp is "June 21 to August 1
 |---|---|---|
 | Answers parents | Claude Opus 5.5, effort `medium` | Correctness and rule-following matter most |
 | Labels topics | Claude Haiku 5.5, effort `low` | Cheap, well-defined task |
-| Grades answers, reviews real replies | Claude Sonnet 5.5 | A different model from the answerer |
+| Grades answers, reviews real replies, drafts the owner's replies, spots lessons | Claude Sonnet 5.5 | A different model from the answerer |
+| Keeps the family card | Claude Haiku 5.5 | Cheap extraction after every message |
 | Proposes fixes | Claude Opus 5.5 | Rare, and quality matters |
 
-Measured costs: about $0.01–0.02 per parent message, plus about $0.006 for its review, $0.17 for a full check of 30 tests, and $0.70 for a before/after check.
+Measured costs: about $0.01–0.02 per parent message, plus about $0.006 for its review and well under a cent for the family card; about half a cent for a drafted owner reply, and the same to look for a lesson in the owner's answer; $0.17 for a full check of 30 tests, and $0.70 for a before/after check.
 
 ## Left out, and why
 
@@ -82,7 +92,8 @@ Measured costs: about $0.01–0.02 per parent message, plus about $0.006 for its
 ## Known limitations
 
 - The judge is a different model but from the same family as the answerer, so it may share blind spots. The spot-check exists to measure this.
-- The grader can be too strict. In the latest run, two of the three failures were it failing correct answers, once while its own reason said "nothing is invented". The spot-check page is how the owner finds this out; tightening the grader prompt (and re-checking it against the owner's labels) is next.
+- The grader can still be wrong. Version 3 fixed the clearest kind (failing answers its own reason called fine), but nobody has spot-checked it yet: there are no owner labels to measure it against. The spot-check page is how that would be found out.
+- A lesson is offered only after the owner sends their reply, and only for a conversation the assistant handed over. Something the owner volunteers in an ordinary conversation isn't picked up.
 - The figure check understands figures, not meaning: "camp is in the summer" can't be wrong by its rules. The reviewer and the tests cover the rest.
 - The reviewer can miss a bad reply, so *Something wrong with this reply?* stays on every reply. It can also flag a fine one; "It's fine" costs one click, and the dismissal count shows how often that happens.
 - A single check runs each test once. Small differences between two checks can be noise. The before/after check deals with this; comparing two separate single checks by eye doesn't.
