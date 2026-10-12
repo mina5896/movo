@@ -12,15 +12,22 @@ import { AutoRefresh } from "../_components/auto-refresh";
 import { Card, Pill, health, pct, timeAgo } from "../_components/ui";
 import { CaseToggle, DismissWriting, KeepTests, RemoveTest, RunButton, WriteTests } from "./client";
 
-/** The failing axis to show the owner first: what was wrong matters more than how it sounded. */
-const REASON_ORDER = ["correct", "rules", "handoff", "expectation", "checks", "tone"] as const;
-
-function firstProblem(scores: Scores): string {
-  for (const axis of REASON_ORDER) {
+/** What went wrong, in a few words: the detail is one click away. */
+function problemLabel(scores: Scores, escalated: boolean): { label: string; reason: string } {
+  const order = ["correct", "rules", "handoff", "expectation", "checks", "tone"] as const;
+  const labels: Record<(typeof order)[number], string> = {
+    correct: "Said something your details don't say",
+    rules: "Didn't follow one of your rules",
+    handoff: escalated ? "Passed it to you when it didn't need to" : "Should have passed it to you",
+    expectation: "Missed what the parent needed",
+    checks: "Got a required detail wrong",
+    tone: "Didn't sound like the club",
+  };
+  for (const axis of order) {
     const s = scores[axis];
-    if (s && !s.pass) return s.reason;
+    if (s && !s.pass) return { label: labels[axis], reason: s.reason };
   }
-  return "";
+  return { label: "", reason: "" };
 }
 
 async function Overview() {
@@ -49,7 +56,7 @@ async function Overview() {
             <>
               <p className={`text-2xl font-semibold ${h.tone}`}>{h.label}</p>
               <p className="mt-1 text-[var(--muted)]">
-                It handled {Math.round(s.passRate * s.cases)} of {s.cases} practice conversations well · checked{" "}
+                {Math.round(s.passRate * s.cases)} of {s.cases} practice conversations handled well · checked{" "}
                 {timeAgo(latest!.startedAt)}
               </p>
             </>
@@ -65,31 +72,29 @@ async function Overview() {
 
       {failing.length > 0 && (
         <section>
-          <h2 className="font-semibold">Answers to look at ({failing.length})</h2>
-          <p className="mb-2 text-sm text-[var(--muted)]">
-            If the answer was wrong, fix the club details or a rule. If the practice conversation expects the wrong thing,
-            turn it off.
-          </p>
+          <h2 className="mb-2 font-semibold">Answers to look at ({failing.length})</h2>
           <Card className="divide-y divide-[var(--border)]">
             {failing.map((r) => {
               const c = failingCases.get(r.caseId);
+              const p = problemLabel(r.scores as Scores, r.escalated);
               return (
-                <div key={r.id} className="flex flex-col gap-1 px-4 py-3 text-sm">
-                  <div className="flex flex-wrap items-center gap-2">
+                <details key={r.id} className="group px-4 py-3 text-sm">
+                  <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1">
                     <span className="font-medium">{c?.title ?? r.caseId}</span>
-                    {c?.turns.channel === "voice" && <Pill>phone call</Pill>}
-                    <span className="ml-auto flex items-center gap-3">
-                      <Link href={`/owner/tests/${latest!.id}#${r.caseId}`} className="text-xs text-[var(--accent)] underline">
-                        See the answer
+                    <span className="text-[var(--danger)]">{p.label}</span>
+                    <span className="ml-auto text-xs text-[var(--muted)] group-open:hidden">Why ▾</span>
+                  </summary>
+                  <div className="mt-2 flex flex-col gap-2">
+                    {c && <p className="text-[var(--muted)]">Parent: &ldquo;{c.turns.messages.at(-1)}&rdquo;</p>}
+                    <p>{p.reason}</p>
+                    <div className="flex gap-4 text-xs">
+                      <Link href={`/owner/tests/${latest!.id}#${r.caseId}`} className="text-[var(--accent)] underline">
+                        See the full answer
                       </Link>
                       {c && <CaseToggle caseId={c.id} active={c.active} />}
-                    </span>
+                    </div>
                   </div>
-                  {c && <p className="text-[var(--muted)]">Parent: &ldquo;{c.turns.messages.at(-1)}&rdquo;</p>}
-                  <p>
-                    <span className="font-medium text-[var(--danger)]">What went wrong:</span> {firstProblem(r.scores as Scores)}
-                  </p>
-                </div>
+                </details>
               );
             })}
           </Card>
@@ -98,51 +103,36 @@ async function Overview() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="p-4 text-sm">
-          <h2 className="font-semibold">Can you trust the grading?</h2>
+          <h2 className="font-semibold">Do you agree with the grading?</h2>
           <p className="mt-1 text-[var(--muted)]">
-            {cal.reviewed > 0
-              ? `The grader agreed with you on ${cal.agreed} of ${cal.reviewed} answers you checked.`
-              : "Look at a few graded answers and say whether you agree. It takes a couple of minutes, and it tells you how much to trust the score."}
+            {cal.reviewed > 0 ? `You agreed on ${cal.agreed} of ${cal.reviewed} answers.` : "Not checked yet."}
           </p>
           <Link href="/owner/tests/spot-check" className="mt-2 inline-block text-[var(--accent)] underline">
-            {cal.reviewed > 0 ? "Check a few more" : "Check some answers"}
+            Check a few answers
           </Link>
         </Card>
         <Card className="p-4 text-sm">
           <h2 className="font-semibold">Real conversations</h2>
           <p className="mt-1 text-[var(--muted)]">
-            {rev.reviewed === 0
-              ? "No replies to parents double-checked yet."
-              : `${rev.reviewed} ${rev.reviewed === 1 ? "reply" : "replies"} to parents double-checked by a second model.`}
+            {rev.reviewed} {rev.reviewed === 1 ? "reply" : "replies"} double-checked
+            {rev.waiting === 0 && rev.reviewed > 0 ? ", none waiting for you." : "."}
           </p>
-          {rev.waiting > 0 ? (
+          {rev.waiting > 0 && (
             <Link href="/owner" className="mt-2 inline-block font-medium text-[var(--warn)] underline">
-              {rev.waiting} waiting for you to look at
+              {rev.waiting} waiting for you
             </Link>
-          ) : (
-            rev.reviewed > 0 && <p className="mt-2 text-[var(--good)]">None waiting for you.</p>
-          )}
-          {rev.corrected + rev.dismissed > 0 && (
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              Of the replies it flagged, you corrected {rev.corrected} and said {rev.dismissed} {rev.dismissed === 1 ? "was" : "were"}{" "}
-              fine.
-            </p>
           )}
         </Card>
       </div>
 
       <section>
-        <h2 className="mb-1 font-semibold">Practice conversations ({cases.length})</h2>
+        <h2 className="font-semibold">Practice conversations ({cases.length})</h2>
         <p className="mb-2 text-sm text-[var(--muted)]">
-          {bySource("seed")} written by hand, {bySource("generated")} by a simulated parent, and {bySource("feedback")} from
-          your corrections. Every correction adds one, so the same mistake is caught if it ever comes back.
+          {bySource("seed")} by hand · {bySource("generated")} by a simulated parent · {bySource("feedback")} from your
+          corrections
         </p>
         <Card className="flex flex-col gap-3 p-4">
           <WriteTests />
-          <p className="text-xs text-[var(--muted)]">
-            A simulated parent writes them and talks to the assistant. A separate step writes what a good answer looks like
-            from your club details. You look them over before they count.
-          </p>
           {writing.map((j) => (
             <p key={j.id} className="text-sm">
               {j.error ? (
@@ -150,9 +140,7 @@ async function Overview() {
                   {j.error} <DismissWriting jobId={j.id} />
                 </span>
               ) : (
-                <span className="text-[var(--muted)]">
-                  Writing {j.count} practice conversations about &ldquo;{j.about}&rdquo;… about a minute.
-                </span>
+                <span className="text-[var(--muted)]">Writing {j.count} about &ldquo;{j.about}&rdquo;… about a minute.</span>
               )}
             </p>
           ))}
@@ -160,14 +148,9 @@ async function Overview() {
         {waiting.length > 0 && (
           <Card className="mt-3 divide-y divide-[var(--border)]">
             <div className="flex flex-wrap items-center gap-3 px-4 py-3">
-              <div className="flex-1">
-                <p className="font-medium">
-                  {waiting.length} new {waiting.length === 1 ? "one" : "ones"} to look over
-                </p>
-                <p className="text-sm text-[var(--muted)]">
-                  Remove any that expect the wrong thing. The rest join every check from now on.
-                </p>
-              </div>
+              <p className="flex-1 font-medium">
+                {waiting.length} new {waiting.length === 1 ? "one" : "ones"} to look over
+              </p>
               <KeepTests caseIds={waiting.map((c) => c.id)} />
             </div>
             {waiting.map((c) => (
@@ -245,10 +228,7 @@ export default function TestsPage() {
   return (
     <div>
       <h1 className="mb-1 text-xl font-semibold">How it&apos;s doing</h1>
-      <p className="mb-4 text-sm text-[var(--muted)]">
-        The assistant is tested on practice conversations, and each answer is graded: is it correct, does it follow your
-        rules, does it hand you the right things, and does it sound like the club.
-      </p>
+      <p className="mb-4 text-sm text-[var(--muted)]">Practice conversations, graded on every answer.</p>
       <Suspense fallback={<p className="text-sm text-[var(--muted)]">Loading…</p>}>
         <Overview />
       </Suspense>

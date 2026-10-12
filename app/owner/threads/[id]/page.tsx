@@ -21,12 +21,6 @@ function justHandedOver(last: { role: string; escalated: boolean; createdAt: num
   return !!last && last.role === "assistant" && last.escalated && Date.now() / 1000 - last.createdAt < 90;
 }
 
-type Meta = {
-  topics?: string[];
-  nextStep?: string | null;
-  latencyMs?: number;
-} | null;
-
 async function Thread({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const { id } = await params;
@@ -65,8 +59,7 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
           <Card className="flex flex-col gap-4 p-4">
             {thread.messages.length === 0 && <p className="text-sm text-[var(--muted)]">No messages yet.</p>}
             {thread.messages.map((m) => {
-              const meta = m.meta as Meta;
-              const rules = (m.usedRules as { id: string; text: string }[] | null) ?? [];
+                  const rules = (m.usedRules as { id: string; text: string }[] | null) ?? [];
               const mine = m.role === "parent";
               const fb = fbs.filter((f) => f.messageId === m.id && f.kind === "correction");
               const lessons = fbs.filter((f) => f.ownerMessageId === m.id);
@@ -97,32 +90,29 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
                       {review?.state === "flagged" && !fb.some((f) => f.status === "pending") && (
                         <ReviewFlag messageId={m.id} concern={review.concern ?? ""} suggestion={review.suggestion} />
                       )}
-                      {(rules.length > 0 || meta?.topics) && (
-                        <details className="text-right text-xs text-[var(--muted)]">
-                          <summary className="cursor-pointer">
-                            {review?.state === "ok" && (
-                              <span className="mr-2 text-[var(--good)]">✓ double-checked</span>
-                            )}
-                            {review?.state === "dismissed" && <span className="mr-2">you said this was fine ·</span>}
-                            Why it said this
-                          </summary>
-                          <div className="mt-1 text-left">
-                            {meta?.topics && <p>Topics it recognised: {meta.topics.join(", ")}</p>}
-                            <p className="mt-1">Your rules it was given:</p>
-                            <ul className="list-disc pl-4">
-                              {rules.map((r) => (
-                                <li key={r.id}>{r.text}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </details>
-                      )}
                       {fb.map((f) => (
                         <FixCard key={f.id} fb={f} impact={impact} />
                       ))}
-                      {!fb.some((f) => f.status === "pending") && review?.state !== "flagged" && (
-                        <CorrectButton messageId={m.id} />
-                      )}
+                      <div className="flex flex-wrap items-start justify-end gap-x-3 gap-y-1 text-xs text-[var(--muted)]">
+                        {review?.state === "ok" && <span className="text-[var(--good)]">✓ checked</span>}
+                        {review?.state === "dismissed" && <span>you said it was fine</span>}
+                        {rules.length > 0 && (
+                          <details className="relative">
+                            <summary className="cursor-pointer list-none hover:underline">Why?</summary>
+                            <div className="absolute right-0 z-10 mt-1 w-72 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-left shadow-lg">
+                              <p className="font-medium">Your rules it followed here:</p>
+                              <ul className="mt-1 list-disc pl-4">
+                                {rules.map((r) => (
+                                  <li key={r.id}>{r.text}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </details>
+                        )}
+                        {!fb.some((f) => f.status === "pending") && review?.state !== "flagged" && (
+                          <CorrectButton messageId={m.id} />
+                        )}
+                      </div>
                     </div>
                   )}
                   {lessons.length > 0 && (
@@ -204,7 +194,7 @@ function FixCard({ fb: f, impact }: { fb: FeedbackRow; impact: ImpactStatus | nu
     <Card className="w-full p-3 text-left text-sm">
       {teach ? (
         <p className="text-xs font-medium">
-          💡 Teach the assistant this? Then it can answer this question itself next time.
+          💡 Teach the assistant this?
         </p>
       ) : (
         <p className="text-xs text-[var(--muted)]">You said: &ldquo;{f.ownerNote}&rdquo;</p>
@@ -213,14 +203,17 @@ function FixCard({ fb: f, impact }: { fb: FeedbackRow; impact: ImpactStatus | nu
         <>
           <p className="mt-1">{f.proposal.summary}</p>
           {f.status === "pending" && (
-            <ul className="mt-1 list-disc pl-4 text-xs">
-              {f.proposal.changes.map((c, i) => (
-                <li key={i}>{describeChange(c)}</li>
-              ))}
-              <li>
-                New practice conversation: {f.proposal.test.title} - {f.proposal.test.criteria}
-              </li>
-            </ul>
+            <details className="mt-1 text-xs text-[var(--muted)]">
+              <summary className="cursor-pointer">Exactly what changes</summary>
+              <ul className="mt-1 list-disc pl-4">
+                {f.proposal.changes.map((c, i) => (
+                  <li key={i}>{describeChange(c)}</li>
+                ))}
+                <li>
+                  New practice conversation: {f.proposal.test.title} - {f.proposal.test.criteria}
+                </li>
+              </ul>
+            </details>
           )}
         </>
       )}
@@ -238,7 +231,7 @@ function FixCard({ fb: f, impact }: { fb: FeedbackRow; impact: ImpactStatus | nu
         {f.status === "applied" && <AppliedFix fb={f} impact={impact} />}
         {f.status === "published" && (
           <p className="text-xs text-[var(--good)]">
-            ✓ Live for parents, with a practice conversation so {teach ? "it keeps answering this" : "this can't come back"}.
+            ✓ Live for parents.
           </p>
         )}
         {f.status === "dismissed" && (
@@ -260,7 +253,7 @@ function AppliedFix({ fb, impact }: { fb: FeedbackRow; impact: ImpactStatus | nu
         <div className="flex flex-wrap items-center gap-3">
           <PublishButton label={fb.proposal?.summary.slice(0, 120) ?? "Correction"} harmful={impact.worse > 0} />
           <Link href="/owner/club" className="text-xs text-[var(--muted)] underline">
-            See all unpublished changes
+            All changes
           </Link>
         </div>
       )}

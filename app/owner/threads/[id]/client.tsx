@@ -44,14 +44,19 @@ export function ReplyBox({
     >
       {draft && !usedDraft && (
         <div className="rounded-xl border border-[var(--border)] bg-[var(--accent-soft)] p-3 text-sm">
-          <p className="text-xs font-medium text-[var(--muted)]">Suggested reply, from your club details</p>
+          <p className="text-xs font-medium text-[var(--muted)]">Suggested reply</p>
           <p className="mt-1 whitespace-pre-wrap">{draft.body}</p>
           {draft.unsure.length > 0 && (
-            <ul className="mt-2 list-disc pl-4 text-xs text-[var(--muted)]">
-              {draft.unsure.map((u, i) => (
-                <li key={i}>{u}</li>
-              ))}
-            </ul>
+            <details className="mt-2 text-xs text-[var(--muted)]">
+              <summary className="cursor-pointer">
+                {draft.unsure.length} {draft.unsure.length === 1 ? "thing" : "things"} to check
+              </summary>
+              <ul className="mt-1 list-disc pl-4">
+                {draft.unsure.map((u, i) => (
+                  <li key={i}>{u}</li>
+                ))}
+              </ul>
+            </details>
           )}
           <button
             type="button"
@@ -124,7 +129,7 @@ export function CorrectButton({
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} className="text-xs text-[var(--muted)] hover:text-[var(--danger)] hover:underline">
-        Something wrong with this reply?
+        Not right?
       </button>
     );
   }
@@ -142,9 +147,9 @@ export function CorrectButton({
           }
         });
       }}
-      className="mt-2 flex w-full flex-col gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3"
+      className="mt-2 flex w-full basis-full flex-col gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-left text-sm text-[var(--foreground)]"
     >
-      <label className="text-xs font-medium">What was wrong, or what should it have said? Plain words are fine.</label>
+      <label className="text-xs font-medium">What should it have said?</label>
       <textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}

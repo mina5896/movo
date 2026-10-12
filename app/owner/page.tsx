@@ -40,7 +40,7 @@ async function Home() {
             <h2 className="mb-2 font-semibold">Needs you</h2>
             {waiting.length === 0 ? (
               <Card className="p-5 text-sm text-[var(--muted)]">
-                ✓ All caught up. The assistant hands a conversation to you when it can&apos;t answer, and it shows up here.
+                ✓ All caught up.
               </Card>
             ) : (
               <div className="flex flex-col gap-3">
@@ -76,7 +76,7 @@ async function Home() {
             <h2 className="mb-2 font-semibold">Families to follow up</h2>
             {leads.length === 0 ? (
               <Card className="p-4 text-sm text-[var(--muted)]">
-                Families who want a trial or to sign up will show up here.
+                None right now.
               </Card>
             ) : (
               <Card className="divide-y divide-[var(--border)]">
@@ -116,9 +116,9 @@ function NeedsYouCard({ t }: { t: ThreadSummary }) {
           {children && <span className="text-sm text-[var(--muted)]">· {children}</span>}
           <span className="ml-auto text-xs text-[var(--muted)]">{timeAgo(t.lastMessageAt)}</span>
         </div>
-        {t.attentionReason && <p className="text-[15px]">{t.attentionReason}</p>}
+        {t.attentionReason && <p className="line-clamp-2 text-[15px]">{t.attentionReason}</p>}
         {t.flagged.length > 0 && (
-          <p className="text-[15px]">
+          <p className="line-clamp-2 text-[15px]">
             <span className="font-medium text-[var(--warn)]">A reply may be wrong:</span> {t.flagged[0]}
           </p>
         )}
@@ -196,8 +196,7 @@ function AssistantCard() {
         <div>
           <p className={`text-base font-semibold ${h.tone}`}>{h.label}</p>
           <p className="text-[var(--muted)]">
-            Handled {Math.round(s.passRate * s.cases)} of {s.cases} practice conversations well · checked{" "}
-            {timeAgo(check!.startedAt)}
+            {Math.round(s.passRate * s.cases)} of {s.cases} practice answers good
           </p>
           {toLook > 0 && (
             <Link href="/owner/tests" className="mt-1 inline-block text-[var(--accent)] underline">

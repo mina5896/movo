@@ -149,7 +149,7 @@ export function ClubEditor({
           onPublish={() => start(() => publishDraftAction(publishLabel || "Updated club details"))}
         />
 
-        <Section title="Programs" hint="Prices, ages, times and spaces. Parents are told exactly what's written here.">
+        <Section title="Programs" hint="">
           {k.programs.map((p, i) => {
             const lp = liveProgram(p.id);
             const changed = PROGRAM_FIELDS.some((f) => (lp?.[f] ?? "") !== (p[f] ?? ""));
@@ -188,7 +188,7 @@ export function ClubEditor({
           })}
         </Section>
 
-        <Section title="Policies" hint="Refunds, weather, late pickup and the rest. Each one only comes up when a parent asks about it.">
+        <Section title="Policies" hint="">
           {k.policies.map((p, i) => (
             <ItemCard
               key={p.id}
@@ -211,7 +211,7 @@ export function ClubEditor({
 
         <Section
           title="Your rules"
-          hint="How the assistant should behave. A rule only comes up in the conversations it's for."
+          hint="How the assistant should behave."
         >
           {k.rules.map((r, i) => {
             const changed = JSON.stringify(liveRule(r.id)) !== JSON.stringify(r);
@@ -282,10 +282,7 @@ function StatusBar(props: {
 
   if (!dirty && !hasChanges) {
     return (
-      <p className="text-sm text-[var(--muted)]">
-        This is what parents are told right now. Click <em>Edit</em> on anything to change it; your edits are saved as a
-        draft, and parents see them only after you publish.
-      </p>
+      <p className="text-sm text-[var(--muted)]">Parents only see changes after you publish.</p>
     );
   }
 
@@ -364,7 +361,7 @@ function Section({ title, hint, children }: { title: string; hint: string; child
     <section className="flex flex-col gap-3">
       <div>
         <h2 className="font-semibold">{title}</h2>
-        <p className="text-sm text-[var(--muted)]">{hint}</p>
+        {hint && <p className="text-sm text-[var(--muted)]">{hint}</p>}
       </div>
       {children}
     </section>
@@ -504,8 +501,8 @@ function TryIt({ unsaved }: { unsaved: boolean }) {
       <div className="border-b border-[var(--border)] px-4 py-3">
         <div className="font-semibold">Try your changes</div>
         <p className="text-xs text-[var(--muted)]">
-          Chat as a parent against your saved draft. Nothing here reaches real families.
-          {unsaved && <span className="text-[var(--warn)]"> Save first to try your latest edits.</span>}
+          Ask as a parent. Uses your unpublished changes.
+          {unsaved && <span className="text-[var(--warn)]"> Save first.</span>}
         </p>
       </div>
       <div className="flex max-h-[50vh] min-h-40 flex-col gap-2 overflow-y-auto p-3">

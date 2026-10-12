@@ -18,9 +18,7 @@ async function Notices() {
     <Card className="mb-6 flex flex-col gap-3 p-4">
       <div>
         <h2 className="font-semibold">Notices for parents</h2>
-        <p className="text-sm text-[var(--muted)]">
-          Tonight&apos;s weather call, a closed field. The assistant knows straight away, and the notice disappears by itself.
-        </p>
+        <p className="text-sm text-[var(--muted)]">The assistant knows at once. Gone by itself when it expires.</p>
       </div>
       {live.length > 0 && (
         <ul className="flex flex-col gap-2">
@@ -67,9 +65,7 @@ export default function ClubPage() {
   return (
     <div>
       <h1 className="mb-1 text-xl font-semibold">Club details</h1>
-      <p className="mb-4 text-sm text-[var(--muted)]">
-        Everything the assistant knows about the club. Change it, try it, and publish when the check says it&apos;s safe.
-      </p>
+      <p className="mb-4 text-sm text-[var(--muted)]">Everything the assistant tells parents.</p>
       <Suspense fallback={null}>
         <Notices />
       </Suspense>
