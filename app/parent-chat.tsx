@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Msg = { id: string; role: "parent" | "assistant" | "owner"; channel: "text" | "voice"; body: string };
+type Msg = {
+  id: string;
+  role: "parent" | "assistant" | "owner";
+  channel: "text" | "voice";
+  body: string;
+  handedOver?: boolean;
+};
+
+/** Things parents most often ask, one tap away on an empty conversation. */
+const STARTERS = ["How much is it?", "Is there a free trial?", "What's on Saturday mornings?", "When is summer camp?"];
 
 const STORAGE_KEY = "movo.parent.thread";
 
@@ -25,7 +34,8 @@ function makeRecognition(): Recognition | null {
   if (!Ctor) return null;
   const r = new Ctor();
   r.lang = "en-US";
-  r.interimResults = false;
+  // Interim results let the call screen show the words as they're heard.
+  r.interimResults = true;
   r.continuous = false;
   return r;
 }
@@ -106,6 +116,7 @@ export function ParentChat() {
   const [error, setError] = useState<string | null>(null);
   const [onCall, setOnCall] = useState(false);
   const [callState, setCallState] = useState<"listening" | "thinking" | "speaking" | "idle">("idle");
+  const [caption, setCaption] = useState<{ who: "you" | "club"; text: string } | null>(null);
   const [voiceSupported] = useState(() => makeRecognition() !== null);
   const onCallRef = useRef(false);
   const recRef = useRef<Recognition | null>(null);
@@ -202,6 +213,7 @@ export function ParentChat() {
       heard = Array.from(e.results)
         .map((r) => r[0].transcript)
         .join(" ");
+      setCaption({ who: "you", text: heard });
     };
     rec.onerror = (e) => {
       if (e.error === "not-allowed") {
@@ -222,6 +234,7 @@ export function ParentChat() {
       if (!onCallRef.current) return;
       if (reply) {
         setCallState("speaking");
+        setCaption({ who: "club", text: reply });
         await speak(reply);
       }
       if (onCallRef.current) listen();
@@ -235,6 +248,7 @@ export function ParentChat() {
     setOnCall(true);
     const greeting = `Hi ${firstName}, this is Riverside Kickers. How can I help?`;
     setCallState("speaking");
+    setCaption({ who: "club", text: greeting });
     await speak(greeting);
     if (onCallRef.current) listen();
   }
@@ -243,6 +257,7 @@ export function ParentChat() {
     onCallRef.current = false;
     setOnCall(false);
     setCallState("idle");
+    setCaption(null);
     recRef.current?.stop();
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   }
@@ -267,14 +282,14 @@ export function ParentChat() {
         </Link>
       </div>
 
-      <div className="flex w-full max-w-md flex-1 flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+      <div className="flex h-[min(760px,calc(100dvh-72px))] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
         <header className="flex items-center gap-3 border-b border-[var(--border)] px-5 py-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-lg text-white">
             ⚽
           </div>
           <div className="flex-1">
             <div className="font-semibold">Riverside Kickers</div>
-            <div className="text-xs text-[var(--muted)]">Usually replies instantly</div>
+            <div className="text-xs text-[var(--muted)]">Text or call · replies in seconds</div>
           </div>
           {threadId && (
             <button onClick={newConversation} className="text-xs text-[var(--muted)] hover:underline">
@@ -315,40 +330,45 @@ export function ParentChat() {
           </form>
         ) : (
           <>
-            <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-4 py-4" style={{ maxHeight: "60vh" }}>
-              {messages.length === 0 && (
-                <p className="mt-8 text-center text-sm text-[var(--muted)]">
-                  Ask about programs, prices, schedules, the weather - anything.
-                </p>
-              )}
-              {messages.map((m) => (
-                <Bubble key={m.id} m={m} />
-              ))}
-              {sending && !onCall && (
-                <div className="self-start rounded-2xl bg-[var(--surface-2)] px-4 py-2 text-sm text-[var(--muted)]">
-                  typing…
-                </div>
-              )}
-              <div ref={bottomRef} />
-            </div>
+            {onCall ? (
+              <CallScreen state={callState} caption={caption} onEnd={endCall} />
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-4">
+                {messages.length === 0 && (
+                  <div className="mt-6 flex flex-col items-center gap-3 text-center">
+                    <p className="text-sm text-[var(--muted)]">
+                      Hi {firstName}! Ask about programs, prices, schedules, the weather - anything.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {STARTERS.map((q) => (
+                        <button
+                          key={q}
+                          onClick={() => send(q, "text")}
+                          disabled={sending}
+                          className="rounded-full border border-[var(--accent)] px-3 py-1.5 text-sm text-[var(--accent)] hover:bg-[var(--accent-soft)]"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {messages.map((m) => (
+                  <Bubble key={m.id} m={m} />
+                ))}
+                {sending && <Typing />}
+                {!sending && messages.at(-1)?.role === "assistant" && messages.at(-1)?.handedOver && (
+                  <p className="mx-auto mt-1 rounded-full bg-[var(--accent-soft)] px-3 py-1 text-center text-xs text-[var(--accent)]">
+                    Passed to the club owner. They&apos;ll reply right here.
+                  </p>
+                )}
+                <div ref={bottomRef} />
+              </div>
+            )}
 
             {error && <p className="px-4 pb-2 text-sm text-[var(--danger)]">{error}</p>}
 
-            {onCall ? (
-              <div className="flex items-center justify-between gap-3 border-t border-[var(--border)] bg-[var(--accent-soft)] px-4 py-3">
-                <div className="text-sm">
-                  <div className="font-medium">On a call</div>
-                  <div className="text-xs text-[var(--muted)]">
-                    {callState === "listening" && "Listening… speak now"}
-                    {callState === "thinking" && "One moment…"}
-                    {callState === "speaking" && "Speaking…"}
-                  </div>
-                </div>
-                <button onClick={endCall} className="rounded-full bg-[var(--danger)] px-4 py-2 text-sm font-medium text-white">
-                  End call
-                </button>
-              </div>
-            ) : (
+            {!onCall && (
               <form onSubmit={submitText} className="flex items-center gap-2 border-t border-[var(--border)] px-3 py-3">
                 <input
                   value={draft}
@@ -390,15 +410,71 @@ function Bubble({ m }: { m: Msg }) {
     <div className={`flex max-w-[85%] flex-col ${mine ? "self-end items-end" : "self-start items-start"}`}>
       <div
         className={`whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
-          mine ? "bg-[var(--accent)] text-white" : "bg-[var(--surface-2)]"
+          mine
+            ? "bg-[var(--accent)] text-white"
+            : m.role === "owner"
+              ? "border border-[var(--accent)] bg-[var(--surface)]"
+              : "bg-[var(--surface-2)]"
         }`}
       >
         {m.body}
       </div>
-      <span className="mt-0.5 px-1 text-[10px] text-[var(--muted)]">
-        {m.channel === "voice" ? "📞 call" : ""}
-        {m.role === "owner" ? `${m.channel === "voice" ? " · " : ""}from the owner` : ""}
-      </span>
+      {(m.channel === "voice" || m.role === "owner") && (
+        <span className="mt-0.5 px-1 text-[10px] text-[var(--muted)]">
+          {m.role === "owner" ? "From the club owner" : ""}
+          {m.channel === "voice" ? `${m.role === "owner" ? " · " : ""}on a call` : ""}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function Typing() {
+  return (
+    <div className="flex items-center gap-1 self-start rounded-2xl bg-[var(--surface-2)] px-4 py-3" aria-label="typing">
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--muted)]"
+          style={{ animationDelay: `${delay}ms` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** A phone call, as it looks on a phone: who you're talking to, what's happening, and the words as captions. */
+function CallScreen({
+  state,
+  caption,
+  onEnd,
+}: {
+  state: "listening" | "thinking" | "speaking" | "idle";
+  caption: { who: "you" | "club"; text: string } | null;
+  onEnd: () => void;
+}) {
+  const status = { listening: "Listening…", thinking: "One moment…", speaking: "Speaking…", idle: "Connecting…" }[state];
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-between bg-[var(--accent-soft)] px-6 py-10 text-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative flex h-24 w-24 items-center justify-center">
+          {state === "speaking" && <span className="absolute inset-0 animate-ping rounded-full bg-[var(--accent)] opacity-20" />}
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[var(--accent)] text-4xl text-white">⚽</div>
+        </div>
+        <div className="text-lg font-semibold">Riverside Kickers</div>
+        <div className="text-sm text-[var(--muted)]">{status}</div>
+      </div>
+      <div className="min-h-24 w-full">
+        {caption && caption.text && (
+          <p className="text-[15px] leading-relaxed">
+            <span className="font-medium text-[var(--muted)]">{caption.who === "you" ? "You" : "Club"}: </span>
+            {caption.text}
+          </p>
+        )}
+      </div>
+      <button onClick={onEnd} className="rounded-full bg-[var(--danger)] px-6 py-3 font-medium text-white">
+        End call
+      </button>
     </div>
   );
 }

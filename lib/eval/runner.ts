@@ -324,11 +324,17 @@ function record(snapshotHash: string, graderVersion: string, caseIds: string[]):
   return out;
 }
 
-export function compare(liveId: string, draftId: string): Comparison {
+/**
+ * `code`: the two runs are the same club details on two versions of the code
+ * (a prompt or model change; see scripts/eval.ts). Every test is then reached
+ * by the change, and only the "before" run itself counts as the record: older
+ * checks on the same details ran on code that may no longer exist.
+ */
+export function compare(liveId: string, draftId: string, opts: { code?: boolean } = {}): Comparison {
   const live = summarize(liveId).perCase;
   const draft = summarize(draftId).perCase;
   const liveRun = getRun(liveId)!;
-  const history = record(liveRun.snapshotHash, liveRun.graderVersion, Object.keys(draft));
+  const history = opts.code ? live : record(liveRun.snapshotHash, liveRun.graderVersion, Object.keys(draft));
   const before = getById(liveRun.snapshotId)!.data;
   const after = getById(getRun(draftId)!.snapshotId)!.data;
   const liveTopics = turnTopics(liveId);
@@ -346,7 +352,7 @@ export function compare(liveId: string, draftId: string): Comparison {
       continue;
     }
     const topics = [...(liveTopics.get(id) ?? []), ...(draftTopics.get(id) ?? [])];
-    const untouched = !changeReaches(before, after, topics);
+    const untouched = !opts.code && !changeReaches(before, after, topics);
     changes.push({ caseId: id, live: l, draft: d, verdict: untouched ? "unsteady" : v, ...(untouched ? { untouched } : {}) });
   }
   const order = { worse: 0, unsteady: 1, better: 2 };
@@ -545,4 +551,18 @@ export function keepCases(caseIds: string[]): void {
 /** A requested test the owner doesn't want. It never ran, so nothing else refers to it. */
 export function removePendingCase(caseId: string): void {
   db.delete(evalCases).where(and(eq(evalCases.id, caseId), eq(evalCases.pending, true))).run();
+}
+
+/**
+ * The newest finished check of the live assistant on its own, the one the
+ * owner's headline score comes from. Falls back to the "before" side of a
+ * before/after check when there is no plain check yet.
+ */
+export function latestLiveCheck(): RunRow | null {
+  const runs = listRuns(30);
+  return (
+    runs.find((r) => r.status === "done" && !r.summary?.baselineRunId && r.label !== "Live (before)") ??
+    runs.find((r) => r.status === "done" && r.label === "Live (before)") ??
+    null
+  );
 }

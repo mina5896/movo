@@ -6,9 +6,11 @@ export function timeAgo(sec: number): string {
   return `${Math.floor(d / 86400)}d ago`;
 }
 
-export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+export function Card({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
   return (
-    <div className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] ${className}`}>{children}</div>
+    <div id={id} className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] ${className}`}>
+      {children}
+    </div>
   );
 }
 
@@ -31,4 +33,11 @@ export function Pill({
 
 export function pct(n: number): string {
   return `${Math.round(n * 100)}%`;
+}
+
+/** The headline score in words, for an owner who shouldn't have to read percentages. */
+export function health(passRate: number): { label: string; tone: string } {
+  if (passRate >= 0.9) return { label: "Doing well", tone: "text-[var(--good)]" };
+  if (passRate >= 0.75) return { label: "Mostly good, a few answers to look at", tone: "text-[var(--warn)]" };
+  return { label: "Needs your attention", tone: "text-[var(--danger)]" };
 }

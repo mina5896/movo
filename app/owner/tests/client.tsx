@@ -19,7 +19,7 @@ export function RunButton() {
       disabled={pending}
       className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
     >
-      {pending ? "Starting…" : "Check the live assistant now"}
+      {pending ? "Starting…" : "Check it again now"}
     </button>
   );
 }
@@ -66,7 +66,7 @@ export function WriteTests() {
           </option>
         ))}
       </select>
-      <span>tests about</span>
+      <span>practice conversations about</span>
       <input
         value={about}
         onChange={(e) => setAbout(e.target.value)}

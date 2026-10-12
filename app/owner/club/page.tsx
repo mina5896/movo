@@ -66,9 +66,9 @@ async function Editor() {
 export default function ClubPage() {
   return (
     <div>
-      <h1 className="mb-1 text-xl font-semibold">Club details &amp; rules</h1>
+      <h1 className="mb-1 text-xl font-semibold">Club details</h1>
       <p className="mb-4 text-sm text-[var(--muted)]">
-        Everything the assistant knows. Change it here, try it, check how answers change, then publish.
+        Everything the assistant knows about the club. Change it, try it, and publish when the check says it&apos;s safe.
       </p>
       <Suspense fallback={null}>
         <Notices />

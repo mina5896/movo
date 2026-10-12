@@ -22,11 +22,11 @@ npm run dev
 ## A tour for the owner
 
 1. **Talk to it as a parent** at `/`. Try the hard ones: "info?", "Coach Mike yelled at my daughter", "can someone just call me". Switch to a call partway through; it remembers the texts. On a call it answers at lower effort to be quicker, and says "one moment" if a reply takes longer than a second and a half.
-2. **Inbox** (`/owner`): conversations that need you come first. That means ones the assistant handed to you, with the reason, and ones holding a reply the second-model review doubts. Each shows what the family told us (children, programs, "wants a trial"). When the assistant hands one over, a reply is drafted for you: *Use this draft*, fill in the [blanks], send. If your answer is something any family could be told, it offers *Teach the assistant this?*, so the same question stops coming to you.
+2. **Home** (`/owner`): what needs you, with the reason in one line; families who want a trial or to sign up; and how the assistant is doing, in words. Conversations that need you are ones the assistant handed to you and ones holding a reply the second-model review doubts. Each shows what the family told us (children, programs, "wants a trial"). When the assistant hands one over, a reply is drafted for you: *Use this draft*, fill in the [blanks], send. If your answer is something any family could be told, it offers *Teach the assistant this?*, so the same question stops coming to you.
 3. **Fixing a reply.** On a flagged reply click *Fix it*: the correction is pre-written, edit it if you like. On any other reply, *Something wrong with this reply?* does the same. You'll see the proposed fix and a new test in plain words. *Looks right - check it* adds it to your unpublished changes and starts the before/after check; when it says *Safe to publish*, publish from right there.
 4. **Notices** (top of `/owner/club`): post tonight's weather call or a field closure. The assistant knows it immediately, and it disappears at the end of the day unless you pick longer.
-5. **Club details & rules** (`/owner/club`): edit prices, schedules and rules. Changes save as a draft. *Try your changes* on the right, then *Check how this changes answers*: every test conversation your change could affect is replayed on the current version and on your change, and anything that got worse is shown side by side. Then publish.
-6. **How it's doing** (`/owner/tests`): the latest score, every answer with the grader's reasons, the list of tests, and *Spot-check the grader* to see whether you agree with it. *Write 10 tests about refunds* (or anything else) has a simulated parent write new test conversations; you look them over and keep the ones you agree with.
+5. **Club details** (`/owner/club`): each program, policy and rule as parents would hear it, with *Edit* on each. Changes save as a draft. *Try your changes* on the right, then *Check how this changes answers*: every test conversation your change could affect is replayed on the current version and on your change, and anything that got worse is shown side by side. Then publish.
+6. **How it's doing** (`/owner/tests`): a plain verdict ("Doing well"), the answers to look at with what went wrong in one line, *Check some answers* to see whether you agree with the grader, and the practice conversations. Scores by area and past checks sit under *Details*. *Write 10 tests about refunds* (or anything else) has a simulated parent write new test conversations; you look them over and keep the ones you agree with.
 
 ## Scripts
 
@@ -34,7 +34,7 @@ npm run dev
 |---|---|
 | `npm test` | Unit tests for the code that doesn't need a model: the figure check, topic scoping, grading, the before/after verdict and which tests a change reaches, club time, the family card. Free and instant |
 | `npm run smoke` | Four of the brief's example messages through the real engine |
-| `npm run eval` | A full check of the live assistant, with failures printed |
+| `npm run eval` | A full check of the live assistant, with failures printed. `-- --reps 3` then `-- --reps 3 --against <run id>` is the before/after check for a code change (prompt, model) |
 | `npx tsx --env-file-if-exists=.env.local scripts/feedback-check.ts <messageId> <note…>` | The correction loop from the command line: propose, approve, compare |
 | `npx tsx --env-file-if-exists=.env.local scripts/write-tests.ts` | Rewrites the simulated-parent tests in `lib/eval/simulated-cases.json` |
 | `npx tsx --env-file-if-exists=.env.local scripts/compare-voice.ts` | Speed and quality of the answer settings for phone calls |

@@ -88,7 +88,7 @@ export function ReplyBox({
             onClick={() => start(() => setStatusAction(threadId, "resolved"))}
             className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm"
           >
-            Mark resolved
+            Mark as done
           </button>
         ) : (
           <button

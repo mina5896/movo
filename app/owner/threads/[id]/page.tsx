@@ -21,7 +21,11 @@ function justHandedOver(last: { role: string; escalated: boolean; createdAt: num
   return !!last && last.role === "assistant" && last.escalated && Date.now() / 1000 - last.createdAt < 90;
 }
 
-type Meta = { topics?: string[]; nextStep?: string | null; latencyMs?: number } | null;
+type Meta = {
+  topics?: string[];
+  nextStep?: string | null;
+  latencyMs?: number;
+} | null;
 
 async function Thread({ params }: { params: Promise<{ id: string }> }) {
   await connection();
@@ -39,104 +43,118 @@ async function Thread({ params }: { params: Promise<{ id: string }> }) {
       <AutoRefresh every={5000} />
       <div className="flex flex-wrap items-center gap-2">
         <Link href="/owner" className="text-sm text-[var(--muted)] hover:underline">
-          ← Inbox
+          ← Home
         </Link>
         <h1 className="text-xl font-semibold">
           {thread.family.parentFirstName} {thread.family.parentLastName ?? ""}
         </h1>
         {thread.family.phone && <span className="text-sm text-[var(--muted)]">{thread.family.phone}</span>}
         {thread.status === "needs_attention" && <Pill tone="danger">needs you</Pill>}
-        {thread.status === "resolved" && <Pill tone="good">resolved</Pill>}
+        {thread.status === "resolved" && <Pill tone="good">done</Pill>}
       </div>
 
-      {thread.attentionReason && (
-        <Card className="border-[var(--danger)] bg-[var(--danger-soft)] p-3 text-sm">
-          <span className="font-medium">Why this needs you:</span> {thread.attentionReason}
+      {thread.attentionReason && thread.status === "needs_attention" && (
+        <Card className="border-[var(--danger)] bg-[var(--danger-soft)] p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--danger)]">Why this needs you</p>
+          <p className="mt-1">{thread.attentionReason}</p>
         </Card>
       )}
 
-      {profile && <FamilyCard profile={profile} />}
-
-      <Card className="flex flex-col gap-4 p-4">
-        {thread.messages.length === 0 && <p className="text-sm text-[var(--muted)]">No messages yet.</p>}
-        {thread.messages.map((m) => {
-          const meta = m.meta as Meta;
-          const rules = (m.usedRules as { id: string; text: string }[] | null) ?? [];
-          const mine = m.role === "parent";
-          const fb = fbs.filter((f) => f.messageId === m.id && f.kind === "correction");
-          const lessons = fbs.filter((f) => f.ownerMessageId === m.id);
-          const review = getReview(m.review);
-          return (
-            <div key={m.id} className={`flex flex-col ${mine ? "items-start" : "items-end"}`}>
-              <div className="mb-0.5 flex items-center gap-2 text-xs text-[var(--muted)]">
-                <span className="font-medium">
-                  {m.role === "parent" ? thread.family.parentFirstName : m.role === "owner" ? "You" : "Assistant"}
-                </span>
-                <span>{m.channel === "voice" ? "📞 call" : "💬 text"}</span>
-                <span>{timeAgo(m.createdAt)}</span>
-                {m.escalated && <Pill tone="danger">handed to you</Pill>}
-              </div>
-              <div
-                className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
-                  mine
-                    ? "bg-[var(--surface-2)]"
-                    : m.role === "owner"
-                      ? "bg-[var(--foreground)] text-[var(--background)]"
-                      : "bg-[var(--accent-soft)]"
-                }`}
-              >
-                {m.body}
-              </div>
-              {m.role === "assistant" && (
-                <div className="mt-1 flex max-w-[80%] flex-col items-end gap-1">
-                  {review?.state === "flagged" && !fb.some((f) => f.status === "pending") && (
-                    <ReviewFlag messageId={m.id} concern={review.concern ?? ""} suggestion={review.suggestion} />
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="flex min-w-0 flex-col gap-4">
+          <Card className="flex flex-col gap-4 p-4">
+            {thread.messages.length === 0 && <p className="text-sm text-[var(--muted)]">No messages yet.</p>}
+            {thread.messages.map((m) => {
+              const meta = m.meta as Meta;
+              const rules = (m.usedRules as { id: string; text: string }[] | null) ?? [];
+              const mine = m.role === "parent";
+              const fb = fbs.filter((f) => f.messageId === m.id && f.kind === "correction");
+              const lessons = fbs.filter((f) => f.ownerMessageId === m.id);
+              const review = getReview(m.review);
+              return (
+                <div key={m.id} className={`flex flex-col ${mine ? "items-start" : "items-end"}`}>
+                  <div className="mb-0.5 flex items-center gap-2 text-xs text-[var(--muted)]">
+                    <span className="font-medium">
+                      {m.role === "parent" ? thread.family.parentFirstName : m.role === "owner" ? "You" : "Assistant"}
+                    </span>
+                    <span>{m.channel === "voice" ? "📞 call" : "💬 text"}</span>
+                    <span>{timeAgo(m.createdAt)}</span>
+                    {m.escalated && <Pill tone="danger">handed to you</Pill>}
+                  </div>
+                  <div
+                    className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2 text-sm ${
+                      mine
+                        ? "bg-[var(--surface-2)]"
+                        : m.role === "owner"
+                          ? "bg-[var(--foreground)] text-[var(--background)]"
+                          : "bg-[var(--accent-soft)]"
+                    }`}
+                  >
+                    {m.body}
+                  </div>
+                  {m.role === "assistant" && (
+                    <div className="mt-1 flex max-w-[80%] flex-col items-end gap-1">
+                      {review?.state === "flagged" && !fb.some((f) => f.status === "pending") && (
+                        <ReviewFlag messageId={m.id} concern={review.concern ?? ""} suggestion={review.suggestion} />
+                      )}
+                      {(rules.length > 0 || meta?.topics) && (
+                        <details className="text-right text-xs text-[var(--muted)]">
+                          <summary className="cursor-pointer">
+                            {review?.state === "ok" && (
+                              <span className="mr-2 text-[var(--good)]">✓ double-checked</span>
+                            )}
+                            {review?.state === "dismissed" && <span className="mr-2">you said this was fine ·</span>}
+                            Why it said this
+                          </summary>
+                          <div className="mt-1 text-left">
+                            {meta?.topics && <p>Topics it recognised: {meta.topics.join(", ")}</p>}
+                            <p className="mt-1">Your rules it was given:</p>
+                            <ul className="list-disc pl-4">
+                              {rules.map((r) => (
+                                <li key={r.id}>{r.text}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </details>
+                      )}
+                      {fb.map((f) => (
+                        <FixCard key={f.id} fb={f} impact={impact} />
+                      ))}
+                      {!fb.some((f) => f.status === "pending") && review?.state !== "flagged" && (
+                        <CorrectButton messageId={m.id} />
+                      )}
+                    </div>
                   )}
-                  {(rules.length > 0 || meta?.topics) && (
-                    <details className="text-right text-xs text-[var(--muted)]">
-                      <summary className="cursor-pointer">
-                        {review?.state === "ok" && <span className="mr-2 text-[var(--good)]">✓ double-checked</span>}
-                        {review?.state === "dismissed" && <span className="mr-2">you said this was fine ·</span>}
-                        Why it said this
-                      </summary>
-                      <div className="mt-1 text-left">
-                        {meta?.topics && <p>Topics it recognised: {meta.topics.join(", ")}</p>}
-                        <p className="mt-1">Your rules it was given:</p>
-                        <ul className="list-disc pl-4">
-                          {rules.map((r) => (
-                            <li key={r.id}>{r.text}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </details>
+                  {lessons.length > 0 && (
+                    <div className="mt-1 flex w-full max-w-[80%] flex-col gap-1">
+                      {lessons.map((f) => (
+                        <FixCard key={f.id} fb={f} impact={impact} />
+                      ))}
+                    </div>
                   )}
-                  {fb.map((f) => (
-                    <FixCard key={f.id} fb={f} impact={impact} />
-                  ))}
-                  {!fb.some((f) => f.status === "pending") && review?.state !== "flagged" && <CorrectButton messageId={m.id} />}
                 </div>
-              )}
-              {lessons.length > 0 && (
-                <div className="mt-1 flex w-full max-w-[80%] flex-col gap-1">
-                  {lessons.map((f) => (
-                    <FixCard key={f.id} fb={f} impact={impact} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </Card>
+              );
+            })}
+          </Card>
 
-      <Card className="p-4">
-        {drafting && (
-          <>
-            <AutoRefresh every={3000} />
-            <p className="mb-2 text-xs text-[var(--muted)]">Drafting a reply for you from your club details…</p>
-          </>
-        )}
-        <ReplyBox key={draft?.forMessageId ?? "none"} threadId={thread.id} status={thread.status} draft={draft} />
-      </Card>
+          <Card className="p-4">
+            {drafting && (
+              <>
+                <AutoRefresh every={3000} />
+                <p className="mb-2 text-xs text-[var(--muted)]">Drafting a reply for you from your club details…</p>
+              </>
+            )}
+            <ReplyBox key={draft?.forMessageId ?? "none"} threadId={thread.id} status={thread.status} draft={draft} />
+          </Card>
+        </div>
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-4 lg:h-fit">
+          {profile ? (
+            <FamilyCard profile={profile} />
+          ) : (
+            <Card className="p-4 text-sm text-[var(--muted)]">Nothing about their family yet.</Card>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
@@ -153,19 +171,17 @@ function FamilyCard({ profile }: { profile: FamilyProfile }) {
     ["Remember", profile.followUp],
   ].filter(([, v]) => v);
   return (
-    <Card className="p-3 text-sm">
+    <Card className="p-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-medium">What they&apos;ve told us</span>
+        <span className="font-semibold">What they&apos;ve told us</span>
         {profile.stage !== "just_asking" && (
-          <Pill tone={isLead(profile) ? "good" : undefined}>
-            {stageLabel(profile.stage)}
-          </Pill>
+          <Pill tone={isLead(profile) ? "good" : undefined}>{stageLabel(profile.stage)}</Pill>
         )}
       </div>
       {rows.length === 0 ? (
         <p className="mt-1 text-xs text-[var(--muted)]">Nothing about their family yet.</p>
       ) : (
-        <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
           {rows.map(([k, v]) => (
             <div key={k} className="contents">
               <dt className="text-[var(--muted)]">{k}</dt>
@@ -187,7 +203,9 @@ function FixCard({ fb: f, impact }: { fb: FeedbackRow; impact: ImpactStatus | nu
   return (
     <Card className="w-full p-3 text-left text-sm">
       {teach ? (
-        <p className="text-xs font-medium">💡 Teach the assistant this? Then it can answer this question itself next time.</p>
+        <p className="text-xs font-medium">
+          💡 Teach the assistant this? Then it can answer this question itself next time.
+        </p>
       ) : (
         <p className="text-xs text-[var(--muted)]">You said: &ldquo;{f.ownerNote}&rdquo;</p>
       )}
@@ -200,7 +218,7 @@ function FixCard({ fb: f, impact }: { fb: FeedbackRow; impact: ImpactStatus | nu
                 <li key={i}>{describeChange(c)}</li>
               ))}
               <li>
-                New test: {f.proposal.test.title} - {f.proposal.test.criteria}
+                New practice conversation: {f.proposal.test.title} - {f.proposal.test.criteria}
               </li>
             </ul>
           )}
@@ -209,17 +227,23 @@ function FixCard({ fb: f, impact }: { fb: FeedbackRow; impact: ImpactStatus | nu
       <div className="mt-2">
         {f.status === "pending" &&
           (teach ? (
-            <ProposalActions feedbackId={f.id} approveLabel="Teach it - check it first" dismissLabel="No, that was just for this family" />
+            <ProposalActions
+              feedbackId={f.id}
+              approveLabel="Teach it - check it first"
+              dismissLabel="No, that was just for this family"
+            />
           ) : (
             <ProposalActions feedbackId={f.id} />
           ))}
         {f.status === "applied" && <AppliedFix fb={f} impact={impact} />}
         {f.status === "published" && (
           <p className="text-xs text-[var(--good)]">
-            ✓ Live for parents, with a test so {teach ? "it keeps answering this" : "this can't come back"}.
+            ✓ Live for parents, with a practice conversation so {teach ? "it keeps answering this" : "this can't come back"}.
           </p>
         )}
-        {f.status === "dismissed" && <p className="text-xs text-[var(--muted)]">{teach ? "Not taught." : "Discarded."}</p>}
+        {f.status === "dismissed" && (
+          <p className="text-xs text-[var(--muted)]">{teach ? "Not taught." : "Discarded."}</p>
+        )}
       </div>
     </Card>
   );

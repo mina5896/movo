@@ -16,14 +16,14 @@ export function ImpactVerdict({ impact, linked = true }: { impact: ImpactStatus;
     case "none":
       return (
         <p className="text-sm text-[var(--muted)]">
-          Not checked yet. A check replays every test conversation your change could affect, on the current version and
+          Not checked yet. A check replays every practice conversation your change could affect, on the current version and
           on your change (up to about 15 minutes and $1.60).
         </p>
       );
     case "running":
       return (
         <p className="text-sm">
-          <span className="font-medium">Checking your change against the test conversations it could affect…</span>{" "}
+          <span className="font-medium">Checking your change against the practice conversations it could affect…</span>{" "}
           <span className="text-[var(--muted)]">Up to about 15 minutes. You can leave this page; the result will wait for you.</span>{" "}
           {link("Watch")}
         </p>
@@ -34,12 +34,12 @@ export function ImpactVerdict({ impact, linked = true }: { impact: ImpactStatus;
       const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
       const skipped =
         impact.notReached > 0
-          ? ` ${plural(impact.notReached, "test doesn't", "tests don't")} touch this change, so ${impact.notReached === 1 ? "it wasn't" : "they weren't"} replayed.`
+          ? ` ${plural(impact.notReached, "practice conversation doesn't", "practice conversations don't")} touch this change, so ${impact.notReached === 1 ? "it wasn't" : "they weren't"} replayed.`
           : "";
       if (impact.ran === 0) {
         return (
           <div className="text-sm">
-            <p className="font-semibold text-[var(--warn)]">No test conversation touches this change.</p>
+            <p className="font-semibold text-[var(--warn)]">No practice conversation touches this change.</p>
             <p className="text-[var(--muted)]">
               So the check can&apos;t tell you anything about it. Try it yourself with <em>Try your changes</em> before
               publishing.

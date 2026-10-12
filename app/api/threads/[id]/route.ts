@@ -13,6 +13,8 @@ export async function GET(_request: Request, ctx: RouteContext<"/api/threads/[id
       role: m.role,
       channel: m.channel,
       body: m.body,
+      // Shown to the parent as "passed to the owner": they were told so in the reply itself.
+      handedOver: m.escalated,
       createdAt: m.createdAt,
     })),
   });

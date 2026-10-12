@@ -23,7 +23,6 @@ export default function OwnerLayout({ children }: LayoutProps<"/owner">) {
           <div className="flex items-center gap-2 font-semibold">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--accent)] text-white">⚽</span>
             Riverside Kickers
-            <span className="text-sm font-normal text-[var(--muted)]">· owner</span>
           </div>
           {/* The active tab depends on the URL, which only exists at request time. */}
           <Suspense fallback={<div className="h-8" />}>
@@ -36,11 +35,12 @@ export default function OwnerLayout({ children }: LayoutProps<"/owner">) {
             />
           </Suspense>
           <Link href="/" className="text-sm text-[var(--accent)] hover:underline">
-            Talk to it as a parent →
+            Parent view →
           </Link>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">{children}</main>
+      {/* Bottom padding on a phone keeps the last item clear of the tab bar. */}
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 pt-6 pb-24 sm:pb-6">{children}</main>
     </div>
   );
 }

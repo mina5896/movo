@@ -31,6 +31,8 @@ export type ThreadSummary = {
   channels: Channel[];
   /** Replies the reviewer flagged that the owner hasn't looked at yet, newest first. */
   flagged: string[];
+  /** A reply is drafted and waiting for the owner (see lib/owner-draft.ts). */
+  draftReady: boolean;
 };
 
 /** Assistant replies the reviewer flagged and the owner hasn't answered (see lib/review.ts). */
@@ -128,6 +130,7 @@ export function listThreads(): ThreadSummary[] {
       lastMessage: last ? { body: last.body, role: last.role, channel: last.channel } : null,
       channels,
       flagged: flaggedConcerns(thread.id),
+      draftReady: thread.status === "needs_attention" && thread.ownerDraft != null,
     };
   });
 }

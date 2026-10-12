@@ -141,7 +141,7 @@ function Comparison({
       })}
       {changes.length === 0 && (
         <Card className="p-4 text-sm">
-          <span className="font-medium text-[var(--good)]">No answer changed result.</span> All {same} test conversations scored
+          <span className="font-medium text-[var(--good)]">No answer changed result.</span> All {same} practice conversations scored
           the same before and after.
         </Card>
       )}
@@ -203,7 +203,7 @@ function SingleRun({ rows, cases }: { rows: ResultRow[]; cases: Map<string, Eval
         {failing.length === 0 && <p className="text-sm text-[var(--muted)]">Every answer passed.</p>}
         <div className="flex flex-col gap-3">
           {failing.map((r) => (
-            <Card key={r.id} className="p-4">
+            <Card key={r.id} className="scroll-mt-20 p-4" id={r.caseId}>
               <CaseHeader c={cases.get(r.caseId)} />
               <Answer r={r} />
             </Card>
@@ -262,7 +262,7 @@ async function RunView({ params }: { params: Promise<{ runId: string }> }) {
       {running && (
         <Card className="p-4 text-sm">
           <p className="font-medium">
-            {baseline ? "Replaying every test conversation on the current version and on your change…" : "Running the test conversations…"}
+            {baseline ? "Replaying every practice conversation on the current version and on your change…" : "Running the practice conversations…"}
           </p>
           <p className="mt-1 text-[var(--muted)]">
             {progress.done + progress.errors + (baseProgress ? baseProgress.done + baseProgress.errors : 0)} answers graded so

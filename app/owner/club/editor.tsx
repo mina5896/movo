@@ -34,6 +34,47 @@ const TOPIC_LABELS: Record<Topic, string> = {
   other: "anything else",
 };
 
+const PROGRAM_FIELDS = ["name", "ages", "schedule", "price", "availability", "notes"] as const;
+
+const FIELD_LABELS: Record<(typeof PROGRAM_FIELDS)[number], { short: string; long: string }> = {
+  name: { short: "Name", long: "Name" },
+  ages: { short: "Ages", long: "Ages" },
+  schedule: { short: "When", long: "When" },
+  price: { short: "Price", long: "Price" },
+  availability: { short: "Spaces", long: "Spaces (e.g. a full class, a waitlist)" },
+  notes: { short: "Also", long: "Anything else parents should know" },
+};
+
+/** One program, policy or rule as parents would hear it, opening into a form to edit. */
+function ItemCard({
+  title,
+  changed,
+  open,
+  onToggle,
+  summary,
+  children,
+}: {
+  title: string;
+  changed: boolean;
+  open: boolean;
+  onToggle: () => void;
+  summary: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`rounded-xl border p-3 ${changed ? "border-[var(--warn)]" : "border-[var(--border)]"}`}>
+      <div className="mb-1 flex items-center gap-2">
+        <span className="font-medium">{title}</span>
+        {changed && <span className="text-xs font-medium text-[var(--warn)]">changed</span>}
+        <button onClick={onToggle} className="ml-auto text-sm text-[var(--accent)] hover:underline">
+          {open ? "Done" : "Edit"}
+        </button>
+      </div>
+      {open ? children : summary}
+    </div>
+  );
+}
+
 export function ClubEditor({
   initial,
   live,
@@ -52,6 +93,15 @@ export function ClubEditor({
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const [publishLabel, setPublishLabel] = useState("");
+  // Cards show what parents are told; a card opens for editing only when asked.
+  const [editing, setEditing] = useState<Set<string>>(new Set());
+  const toggle = (id: string) =>
+    setEditing((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   function update(fn: (draft: Knowledge) => void) {
     setK((prev) => {
@@ -99,68 +149,107 @@ export function ClubEditor({
           onPublish={() => start(() => publishDraftAction(publishLabel || "Updated club details"))}
         />
 
-        <Section title="Programs" hint="Prices, ages, times and availability. Parents are told exactly what's written here.">
-          {k.programs.map((p, i) => (
-            <div key={p.id} className="rounded-xl border border-[var(--border)] p-3">
-              <div className="grid gap-2 sm:grid-cols-2">
-                {(["name", "ages", "schedule", "price", "availability", "notes"] as const).map((field) => (
-                  <Field
-                    key={field}
-                    label={field === "availability" ? "availability (e.g. full, waitlist)" : field}
-                    value={p[field] ?? ""}
-                    changed={(liveProgram(p.id)?.[field] ?? "") !== (p[field] ?? "")}
-                    wide={field === "schedule" || field === "availability" || field === "notes"}
-                    onChange={(v) => update((d) => void ((d.programs[i] as Program)[field] = v))}
-                  />
-                ))}
-              </div>
-            </div>
-          ))}
+        <Section title="Programs" hint="Prices, ages, times and spaces. Parents are told exactly what's written here.">
+          {k.programs.map((p, i) => {
+            const lp = liveProgram(p.id);
+            const changed = PROGRAM_FIELDS.some((f) => (lp?.[f] ?? "") !== (p[f] ?? ""));
+            return (
+              <ItemCard
+                key={p.id}
+                title={`${p.name} · ages ${p.ages}`}
+                changed={changed}
+                open={editing.has(p.id)}
+                onToggle={() => toggle(p.id)}
+                summary={
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-sm">
+                    {PROGRAM_FIELDS.filter((f) => f !== "name" && f !== "ages" && p[f]).map((f) => (
+                      <div key={f} className="contents">
+                        <dt className="text-[var(--muted)]">{FIELD_LABELS[f].short}</dt>
+                        <dd>{p[f]}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                }
+              >
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {PROGRAM_FIELDS.map((field) => (
+                    <Field
+                      key={field}
+                      label={FIELD_LABELS[field].long}
+                      value={p[field] ?? ""}
+                      changed={(lp?.[field] ?? "") !== (p[field] ?? "")}
+                      wide={field === "schedule" || field === "availability" || field === "notes"}
+                      onChange={(v) => update((d) => void ((d.programs[i] as Program)[field] = v))}
+                    />
+                  ))}
+                </div>
+              </ItemCard>
+            );
+          })}
         </Section>
 
-        <Section title="Policies" hint="Each policy is only shown to the assistant when a parent's message is about that topic.">
+        <Section title="Policies" hint="Refunds, weather, late pickup and the rest. Each one only comes up when a parent asks about it.">
           {k.policies.map((p, i) => (
-            <div key={p.id} className="rounded-xl border border-[var(--border)] p-3">
-              <div className="mb-1 flex items-center justify-between text-sm font-medium">
-                {p.name}
-                <span className="text-xs font-normal text-[var(--muted)]">used for: {TOPIC_LABELS[p.topic]}</span>
-              </div>
+            <ItemCard
+              key={p.id}
+              title={p.name}
+              changed={livePolicy(p.id)?.detail !== p.detail}
+              open={editing.has(p.id)}
+              onToggle={() => toggle(p.id)}
+              summary={<p className="text-sm">{p.detail}</p>}
+            >
               <Field
-                label="detail"
+                label="What parents are told"
                 value={p.detail}
                 changed={livePolicy(p.id)?.detail !== p.detail}
                 wide
                 onChange={(v) => update((d) => void ((d.policies[i] as Policy).detail = v))}
               />
-            </div>
+            </ItemCard>
           ))}
         </Section>
 
         <Section
           title="Your rules"
-          hint="How the assistant should behave. Pick the topics a rule is for, so it only comes up in those conversations."
+          hint="How the assistant should behave. A rule only comes up in the conversations it's for."
         >
-          {k.rules.map((r, i) => (
-            <RuleEditor
-              key={r.id}
-              rule={r}
-              changed={JSON.stringify(liveRule(r.id)) !== JSON.stringify(r)}
-              onChange={(fn) => update((d) => fn(d.rules[i]))}
-              onRemove={() => update((d) => void d.rules.splice(i, 1))}
-            />
-          ))}
+          {k.rules.map((r, i) => {
+            const changed = JSON.stringify(liveRule(r.id)) !== JSON.stringify(r);
+            return editing.has(r.id) ? (
+              <RuleEditor
+                key={r.id}
+                rule={r}
+                changed={changed}
+                onChange={(fn) => update((d) => fn(d.rules[i]))}
+                onRemove={() => update((d) => void d.rules.splice(i, 1))}
+                onDone={() => toggle(r.id)}
+              />
+            ) : (
+              <div
+                key={r.id}
+                className={`flex items-start gap-3 rounded-xl border p-3 ${changed ? "border-[var(--warn)]" : "border-[var(--border)]"} ${r.active ? "" : "opacity-60"}`}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm">{r.text || <span className="text-[var(--muted)]">(empty rule)</span>}</p>
+                  <p className="mt-1 text-xs text-[var(--muted)]">
+                    {r.scope === "always" ? "In every conversation" : `When it's about ${r.scope.map((t) => TOPIC_LABELS[t]).join(", ")}`}
+                    {r.source === "feedback" && " · from one of your corrections"}
+                    {!r.active && " · turned off"}
+                    {changed && <span className="font-medium text-[var(--warn)]"> · changed</span>}
+                  </p>
+                </div>
+                <button onClick={() => toggle(r.id)} className="text-sm text-[var(--accent)] hover:underline">
+                  Edit
+                </button>
+              </div>
+            );
+          })}
           <button
-            onClick={() =>
-              update((d) =>
-                void d.rules.push({
-                  id: `owner-${Math.random().toString(36).slice(2, 8)}`,
-                  text: "",
-                  scope: ["other"],
-                  source: "owner",
-                  active: true,
-                }),
-              )
-            }
+            onClick={() => {
+              const id = `owner-${Math.random().toString(36).slice(2, 8)}`;
+              update((d) => void d.rules.push({ id, text: "", scope: ["other"], source: "owner", active: true }));
+              toggle(id);
+            }}
             className="self-start rounded-lg border border-dashed border-[var(--border)] px-3 py-1.5 text-sm text-[var(--muted)]"
           >
             + Add a rule
@@ -191,18 +280,25 @@ function StatusBar(props: {
   const checked = impact.state === "done";
   const harmful = impact.state === "done" && impact.worse > 0;
 
+  if (!dirty && !hasChanges) {
+    return (
+      <p className="text-sm text-[var(--muted)]">
+        This is what parents are told right now. Click <em>Edit</em> on anything to change it; your edits are saved as a
+        draft, and parents see them only after you publish.
+      </p>
+    );
+  }
+
   return (
-    <div className="sticky top-0 z-10 flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
+    <div className="sticky top-2 z-10 flex flex-col gap-3 rounded-2xl border border-[var(--accent)] bg-[var(--surface)] p-4 shadow-md">
       <div className="text-sm">
         {dirty ? (
           <span className="font-medium text-[var(--warn)]">You have edits that aren&apos;t saved yet.</span>
         ) : hasChanges ? (
           <span className="font-medium">
-            Unpublished changes. Parents still get the current version until you publish.
+            You have changes waiting. Parents still get the current version until you publish.
           </span>
-        ) : (
-          <span className="text-[var(--muted)]">This is what parents get right now. Edits are saved as a draft first.</span>
-        )}
+        ) : null}
       </div>
 
       {hasChanges && !dirty && (
@@ -310,11 +406,13 @@ function RuleEditor({
   changed,
   onChange,
   onRemove,
+  onDone,
 }: {
   rule: Rule;
   changed: boolean;
   onChange: (fn: (r: Rule) => void) => void;
   onRemove: () => void;
+  onDone: () => void;
 }) {
   const always = rule.scope === "always";
   return (
@@ -359,10 +457,13 @@ function RuleEditor({
         {changed && <span className="font-medium text-[var(--warn)]">changed</span>}
         <label className="ml-auto flex items-center gap-1">
           <input type="checkbox" checked={rule.active} onChange={(e) => onChange((r) => void (r.active = e.target.checked))} />
-          on
+          turned on
         </label>
         <button onClick={onRemove} className="text-[var(--muted)] hover:text-[var(--danger)]">
           Remove
+        </button>
+        <button onClick={onDone} className="text-sm text-[var(--accent)] hover:underline">
+          Done
         </button>
       </div>
     </div>
