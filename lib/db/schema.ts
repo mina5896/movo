@@ -25,6 +25,21 @@ export const snapshots = sqliteTable("snapshots", {
   publishedAt: integer("published_at"),
 });
 
+/**
+ * Short-lived announcements from the owner: tonight's weather call, a closed
+ * field. They take effect at once rather than going through the draft and the
+ * check, because "practice is cancelled tonight" is useless in four minutes,
+ * and they expire by themselves so they can't go stale the way the old camp
+ * dates did.
+ */
+export const notices = sqliteTable("notices", {
+  id: text("id").primaryKey(),
+  text: text("text").notNull(),
+  expiresAt: integer("expires_at").notNull(),
+  removedAt: integer("removed_at"),
+  createdAt: integer("created_at").notNull().default(now),
+});
+
 export const families = sqliteTable("families", {
   id: text("id").primaryKey(),
   parentFirstName: text("parent_first_name").notNull(),

@@ -16,6 +16,7 @@ Build order:
 6. **Corrections in plain words** that become a reviewed change plus a permanent test.
 7. **Grader spot-check**, so the owner knows how far to trust the scores.
 8. **Less work for the owner**: every real reply is double-checked by a second model, and approving a fix starts the check on its own.
+9. **Today's date, owner notices, and a figure check in code** before any reply is sent.
 
 ## Key decisions
 
@@ -35,6 +36,12 @@ Build order:
 
 - *Every real reply is double-checked.* After the parent has the reply (so it never slows them down), Claude Sonnet 5.5 reads it against the club details and rules it was given. A doubtful reply moves its conversation to *Needs you*, with the concern and a suggested correction in the owner's voice. The owner clicks *Fix it* or *It's fine*. The reviewer only points; changes still go through the correction and the check. How the owner answers its flags (corrected vs. "it's fine") is shown as its track record. This costs about half a cent per reply and can be turned off with `MOVO_AUTO_REVIEW=off`.
 - *One click from fix to verdict.* Approving a proposed fix also starts the before/after check, and the result is one line: "✓ Safe to publish: 2 answers got better, nothing got worse", or "Hold on: 1 answer got worse". A Publish button sits next to it, on the conversation itself. The side-by-side answers are a link away for anyone who wants them.
+
+**The assistant knows today's date and the owner's notices.** "Is there practice tonight?" needs the weekday, and the brief's own weather policy means the answer changes daily. The owner posts a notice ("Tonight's practice is cancelled") that the assistant knows at once, and it disappears at the end of the day, a week, or when taken down. Notices skip the draft and the check on purpose. A weather call that waits four minutes is useless, and the owner is making the announcement anyway. The safety comes from them expiring by themselves (so they can't go stale the way the camp dates did) and from the assistant only mentioning a notice when it's relevant. A test checks a field closure doesn't come up in a price question. Tests pin their own date and notices, so they never depend on what's posted today.
+
+Found when the date was added: the club details say camp is "June 21 to August 13" with no year. Told to assume the next one, the assistant started saying "2027", which the club details don't say. It now repeats dates as written. The year belongs in the club details, and that's the owner's edit to make.
+
+**Every price, time and date is checked in code before a reply is sent.** Each figure in a reply must appear in the club details, a notice, the conversation, or the days around today. A few one-step calculations are also allowed (several weeks, 10% off a sibling, a per-class price). A longer total is accepted only when the reply shows the working and the sum is right ("$930 + $837 = $1,767"). If the first draft fails, the assistant rewrites it once with the problem named, which usually just means showing the working. A figure that still fails goes to the owner as a flagged reply. The allowed calculations are deliberately narrow: summing every pair of the club's prices would have let 1,700 of the first 2,000 dollar amounts through. Unit tests cover the cases.
 
 **Before/after checks confirm changes before reporting them.** Both versions answer every test once. Any test whose result differs gets two more tries on each side. It's reported as "got worse" only if it consistently passes before and fails after, otherwise as "mixed". Without this, ordinary variation in wording would cry wolf. A full check costs about $0.70 and takes about 4 minutes.
 
@@ -68,6 +75,8 @@ Measured costs: about $0.01–0.02 per parent message, plus about $0.006 for its
 ## Known limitations
 
 - The judge is a different model but from the same family as the answerer, so it may share blind spots. The spot-check exists to measure this.
+- The grader can be too strict. In the latest run, two of the three failures were it failing correct answers, once while its own reason said "nothing is invented". The spot-check page is how the owner finds this out; tightening the grader prompt (and re-checking it against the owner's labels) is next.
+- The figure check understands figures, not meaning: "camp is in the summer" can't be wrong by its rules. The reviewer and the tests cover the rest.
 - The reviewer can miss a bad reply, so *Something wrong with this reply?* stays on every reply. It can also flag a fine one; "It's fine" costs one click, and the dismissal count shows how often that happens.
 - A single check runs each test once. Small differences between two checks can be noise. The before/after check deals with this; comparing two separate single checks by eye doesn't.
 - Every check spends real money. The cost is shown on each check.

@@ -1,6 +1,11 @@
 import type { AxisScore, Expectations, Scores } from "../types";
 
-export type Transcript = { replies: string[]; escalatedAny: boolean };
+export type Transcript = {
+  replies: string[];
+  escalatedAny: boolean;
+  /** Figures in the final reply that the club details don't support (lib/engine/grounding.ts). */
+  unsupported?: string[];
+};
 
 /**
  * The checks that don't need a model. They run first and override the judge
@@ -34,7 +39,8 @@ export function deterministicScores(t: Transcript, e: Expectations): Scores {
     const hit = t.replies.find((r) => r.toLowerCase().includes(banned.toLowerCase()));
     if (hit) problems.push(`mentioned "${banned}", which it shouldn't have`);
   }
-  if ((e.mustMention?.length ?? 0) + (e.mustNotMention?.length ?? 0) > 0) {
+  for (const f of t.unsupported ?? []) problems.push(`said "${f}", which isn't in the club details`);
+  if ((e.mustMention?.length ?? 0) + (e.mustNotMention?.length ?? 0) + (t.unsupported?.length ?? 0) > 0) {
     const score: AxisScore = problems.length
       ? { pass: false, reason: `The reply ${problems.join("; ")}.` }
       : { pass: true, reason: "Included and avoided the right words." };

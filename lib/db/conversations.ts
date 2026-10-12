@@ -5,6 +5,7 @@ import { answer, type AnswerResult, type Turn } from "@/lib/engine/answer";
 import type { Topic } from "@/lib/engine/snapshot";
 
 import { db } from "./index";
+import { activeNotices, toNotice } from "./notices";
 import { families, messages, threads } from "./schema";
 import { getLive } from "./snapshots";
 
@@ -180,6 +181,7 @@ export async function handleParentMessage(
       message: body,
       channel,
       parentFirstName: thread.family.parentFirstName,
+      notices: activeNotices().map(toNotice),
     });
   } catch (err) {
     // The parent is still waiting; a silent failure is the worst outcome.
@@ -207,7 +209,21 @@ export async function handleParentMessage(
       model: result.servedModel,
       status: result.status,
       nextStep: result.nextStep,
+      context: result.context,
+      grounding: result.grounding,
     },
+    // A figure that survived the rewrite goes straight to the owner; the
+    // reviewer leaves this flag alone (see lib/review.ts).
+    ...(result.grounding.unsupported.length > 0
+      ? {
+          review: {
+            state: "flagged",
+            concern: `This reply mentions ${result.grounding.unsupported.join(", ")}, which isn't in your club details.`,
+            source: "check",
+            at: Math.floor(Date.now() / 1000),
+          },
+        }
+      : {}),
   });
 
   if (result.escalate) {

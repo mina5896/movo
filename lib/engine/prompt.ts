@@ -55,6 +55,8 @@ Set escalate to true when any of these is true:
 
 When you escalate, still reply to the parent: acknowledge what they asked, say the owner will follow up, and be specific about what happens next. Do not promise a time you have not been given.
 
+Use the date and time given below to work out "today", "tonight" or "this Saturday". When a date in the club details has no year, give it exactly as written. Don't add a year or say whether it has passed.
+
 Keep replies short enough to read comfortably as a text message.`;
 }
 
@@ -97,7 +99,7 @@ export type BuiltPrompt = {
  * claims it used - so the owner's view of "which rules produced this answer"
  * is a fact rather than a self-report.
  */
-export function buildPrompt(k: Knowledge, topics: Topic[]): BuiltPrompt {
+export function buildPrompt(k: Knowledge, topics: Topic[], context: string): BuiltPrompt {
   const injectedRules = rulesForTopics(k, topics);
   return {
     topics,
@@ -108,7 +110,7 @@ export function buildPrompt(k: Knowledge, topics: Topic[]): BuiltPrompt {
         text: stableSystem(k),
         cache_control: { type: "ephemeral" },
       },
-      { type: "text", text: scopedSystem(k, topics, injectedRules) },
+      { type: "text", text: `${context}\n\n${scopedSystem(k, topics, injectedRules)}` },
     ],
   };
 }

@@ -11,6 +11,7 @@ import { costOf, MODELS, type Usage } from "@/lib/engine/models";
 import { SEED_CASES } from "./cases";
 import { deterministicScores } from "./graders/deterministic";
 import { GRADER_VERSION, judge } from "./graders/judge";
+import { verdict, type CaseChange, type CaseOutcome } from "./verdict";
 import { AXES, overallPass, type Axis, type CaseTurns, type Expectations, type Scores } from "./types";
 
 export type EvalCase = Omit<typeof evalCases.$inferSelect, "turns" | "expectations" | "tags"> & {
@@ -94,6 +95,13 @@ async function attemptCase(snapshot: SnapshotRow, c: EvalCase): Promise<Attempt>
   const history: Turn[] = [];
   const replies: AnswerResult[] = [];
   const parentFirstName = c.turns.parentFirstName ?? "Sam";
+  const now = c.turns.now ? new Date(c.turns.now) : new Date();
+  const nowSec = Math.floor(now.getTime() / 1000);
+  const notices = (c.turns.notices ?? []).map((n) => ({
+    text: n.text,
+    createdAt: nowSec - Math.round((n.postedHoursAgo ?? 1) * 3600),
+    expiresAt: nowSec + 86_400,
+  }));
 
   for (const message of c.turns.messages) {
     const r = await answer({
@@ -102,6 +110,8 @@ async function attemptCase(snapshot: SnapshotRow, c: EvalCase): Promise<Attempt>
       message,
       channel: c.turns.channel,
       parentFirstName,
+      now,
+      notices,
     });
     if (r.status === "refusal") throw new EngineError("assistant refused", "serving");
     replies.push(r);
@@ -109,7 +119,11 @@ async function attemptCase(snapshot: SnapshotRow, c: EvalCase): Promise<Attempt>
   }
 
   const det = deterministicScores(
-    { replies: replies.map((r) => r.reply), escalatedAny: replies.some((r) => r.escalate) },
+    {
+      replies: replies.map((r) => r.reply),
+      escalatedAny: replies.some((r) => r.escalate),
+      unsupported: replies.at(-1)!.grounding.unsupported,
+    },
     c.expectations,
   );
 
@@ -124,6 +138,7 @@ async function attemptCase(snapshot: SnapshotRow, c: EvalCase): Promise<Attempt>
     expectations: c.expectations,
     parentFirstName,
     channel: c.turns.channel,
+    context: replies.at(-1)!.context,
   });
 
   // Deterministic verdicts win on the axes they cover.
@@ -160,6 +175,7 @@ async function runAttempt(runId: string, snapshot: SnapshotRow, c: EvalCase, rep
             escalationReason: r.escalationReason,
             topics: r.topics,
             rules: r.usedRules.map((x) => x.id),
+            grounding: r.grounding,
           })),
           system: last.trajectory.system,
         },
@@ -186,7 +202,6 @@ async function runAttempt(runId: string, snapshot: SnapshotRow, c: EvalCase, rep
   }
 }
 
-export type CaseOutcome = { passes: number; total: number; rate: number };
 export type RunSummary = {
   cases: number;
   attempts: number;
@@ -228,13 +243,7 @@ export function summarize(runId: string): RunSummary {
   return { cases: caseIds.length, attempts: rows.length, errors: errors.length, passRate, axes, perCase };
 }
 
-export type CaseChange = {
-  caseId: string;
-  live: CaseOutcome | null;
-  draft: CaseOutcome | null;
-  /** worse/better: consistent across the confirming attempts. unsteady: mixed results. */
-  verdict: "worse" | "better" | "unsteady";
-};
+export type { CaseChange, CaseOutcome };
 export type Comparison = { changes: CaseChange[]; same: number };
 
 function compare(liveId: string, draftId: string): Comparison {
@@ -247,17 +256,9 @@ function compare(liveId: string, draftId: string): Comparison {
     const l = live[id] ?? null;
     const d = draft[id] ?? null;
     if (!l || !d) continue;
-    if (l.rate === d.rate && (l.rate === 0 || l.rate === 1)) {
-      same++;
-      continue;
-    }
-    if (l.rate === d.rate) {
-      changes.push({ caseId: id, live: l, draft: d, verdict: "unsteady" });
-      continue;
-    }
-    const worse = d.rate < l.rate;
-    const decisive = worse ? d.rate <= 1 / 3 && l.rate >= 2 / 3 : l.rate <= 1 / 3 && d.rate >= 2 / 3;
-    changes.push({ caseId: id, live: l, draft: d, verdict: decisive ? (worse ? "worse" : "better") : "unsteady" });
+    const v = verdict(l, d);
+    if (v === null) same++;
+    else changes.push({ caseId: id, live: l, draft: d, verdict: v });
   }
   const order = { worse: 0, unsteady: 1, better: 2 };
   changes.sort((a, b) => order[a.verdict] - order[b.verdict]);

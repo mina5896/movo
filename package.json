@@ -10,7 +10,8 @@
     "seed": "tsx --env-file-if-exists=.env.local lib/db/seed.ts",
     "push": "drizzle-kit push",
     "smoke": "tsx --env-file-if-exists=.env.local scripts/smoke.ts",
-    "eval": "tsx --env-file-if-exists=.env.local scripts/eval.ts"
+    "eval": "tsx --env-file-if-exists=.env.local scripts/eval.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",
@@ -33,6 +34,7 @@
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

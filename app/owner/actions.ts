@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import * as z from "zod";
 
 import { postOwnerReply, setThreadStatus } from "@/lib/db/conversations";
+import { activeNotices, addNotice, removeNotice, toNotice } from "@/lib/db/notices";
 import {
   discardDraft,
   getDraft,
@@ -14,6 +15,7 @@ import {
   saveDraft,
 } from "@/lib/db/snapshots";
 import { answer, type Turn } from "@/lib/engine/answer";
+import { endOfClubDay } from "@/lib/engine/context";
 import { TOPICS, type Knowledge, type Topic } from "@/lib/engine/snapshot";
 import { saveLabel } from "@/lib/eval/calibration";
 import { setCaseActive, startComparison, startRun } from "@/lib/eval/runner";
@@ -165,6 +167,7 @@ export async function tryDraftAction(
       message: text.data,
       channel,
       parentFirstName: "Sam",
+      notices: activeNotices().map(toNotice),
     });
     return {
       reply: r.reply,
@@ -182,4 +185,25 @@ export async function tryDraftAction(
 export async function labelAction(resultId: string, label: "pass" | "fail", note?: string) {
   const r = saveLabel(z.string().parse(resultId), z.enum(["pass", "fail"]).parse(label), note?.slice(0, 1000));
   return r;
+}
+
+/**
+ * Notices take effect at once, without a draft or a check: they are
+ * announcements the owner is making anyway, and they expire by themselves.
+ */
+export async function addNoticeAction(
+  text: string,
+  until: "today" | "tomorrow" | "week",
+): Promise<{ error?: string }> {
+  const body = z.string().trim().min(3).max(500).safeParse(text);
+  if (!body.success) return { error: "Write the notice in a few words." };
+  const days = { today: 0, tomorrow: 1, week: 6 }[z.enum(["today", "tomorrow", "week"]).parse(until)];
+  addNotice(body.data, endOfClubDay(new Date(), days));
+  refresh();
+  return {};
+}
+
+export async function removeNoticeAction(id: string) {
+  removeNotice(z.string().parse(id));
+  refresh();
 }

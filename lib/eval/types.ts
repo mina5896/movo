@@ -3,6 +3,10 @@ export type CaseTurns = {
   channel: "text" | "voice";
   messages: string[];
   parentFirstName?: string;
+  /** ISO time to answer at, so "tonight" means the same day on every run. Defaults to now. */
+  now?: string;
+  /** Owner notices in force for this test. Live notices are never used in tests. */
+  notices?: { text: string; postedHoursAgo?: number }[];
 };
 
 /**

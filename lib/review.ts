@@ -29,6 +29,8 @@ export type Review = {
   suggestion?: string;
   model?: string;
   costUsd?: number;
+  /** "check": the figure check in code flagged it before the reviewer ran. */
+  source?: "check" | "reviewer";
   at: number;
 };
 
@@ -68,6 +70,8 @@ export function getReview(meta: unknown): Review | null {
 export async function reviewReply(messageId: string): Promise<void> {
   const msg = getMessage(messageId);
   if (!msg || msg.role !== "assistant" || !msg.snapshotId) return;
+  // Already flagged by the figure check: that's a fact, not an opinion to overwrite.
+  if (getReview(msg.review)?.state === "flagged") return;
   const snapshot = getById(msg.snapshotId);
   const thread = getThread(msg.threadId);
   if (!snapshot || !thread) return;
@@ -82,7 +86,8 @@ export async function reviewReply(messageId: string): Promise<void> {
     })
     .join("\n\n");
   const rules = ((msg.usedRules as { text: string }[] | null) ?? []).map((r) => `- ${r.text}`).join("\n") || "(none)";
-  const nextStep = (msg.meta as { nextStep?: string | null } | null)?.nextStep;
+  const meta = msg.meta as { nextStep?: string | null; context?: string } | null;
+  const nextStep = meta?.nextStep;
 
   try {
     const response = await anthropic().messages.parse({
@@ -97,6 +102,8 @@ The assistant's only source of truth is the club details below. If the reply sta
           content: `## Club details when the reply was sent
 
 ${formatKnowledge(snapshot.data)}
+
+${meta?.context ?? ""}
 
 ## Owner rules the assistant was given for this reply
 

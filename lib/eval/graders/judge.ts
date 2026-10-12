@@ -46,6 +46,8 @@ export type JudgeInput = {
   expectations: Expectations;
   parentFirstName?: string;
   channel: "text" | "voice";
+  /** Today's date and the notices in force, exactly as the assistant saw them. */
+  context: string;
 };
 
 /**
@@ -80,6 +82,8 @@ The assistant's only source of truth is the club details below. If the reply sta
         content: `## Club details (the truth for this test)
 
 ${formatKnowledge(input.knowledge)}
+
+${input.context}
 
 ## Owner rules that applied to the final reply
 

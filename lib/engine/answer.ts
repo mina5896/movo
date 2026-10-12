@@ -3,6 +3,8 @@ import * as z from "zod";
 
 import { classify } from "./classify";
 import { anthropic, EngineError } from "./client";
+import { describeContext, upcomingDays, type Notice } from "./context";
+import { unsupportedFigures } from "./grounding";
 import { addUsage, costOf, MODELS, type Usage } from "./models";
 import { buildPrompt } from "./prompt";
 import type { Knowledge, Rule, Topic } from "./snapshot";
@@ -42,6 +44,10 @@ export type AnswerInput = {
   message: string;
   channel: "text" | "voice";
   parentFirstName?: string | null;
+  /** Defaults to the real time. Tests pin it so "tonight" means the same thing every run. */
+  now?: Date;
+  /** The owner's current notices. */
+  notices?: Notice[];
 };
 
 export type AnswerResult = {
@@ -59,6 +65,14 @@ export type AnswerResult = {
   costUsd: number;
   servedModel: string;
   latencyMs: number;
+  /**
+   * The check in code that every price, time and date came from the club
+   * details. `retried`: the first draft failed it and was rewritten.
+   * `unsupported`: figures still unsupported after that, for the owner to see.
+   */
+  grounding: { retried: boolean; firstDraft: string | null; unsupported: string[] };
+  /** The date and notices the reply was written against, so a reviewer can judge it the same way. */
+  context: string;
   /** Everything needed to explain this answer later without re-running it. */
   trajectory: {
     system: string;
@@ -80,6 +94,9 @@ export type AnswerResult = {
  */
 export async function answer(input: AnswerInput): Promise<AnswerResult> {
   const { knowledge, history, message, channel } = input;
+  const now = input.now ?? new Date();
+  const notices = input.notices ?? [];
+  const context = describeContext(now, notices);
 
   const classification = await classify(knowledge, history, message);
   // A follow-up ("actually, can someone call me") is classified on its own
@@ -90,7 +107,7 @@ export async function answer(input: AnswerInput): Promise<AnswerResult> {
     .slice(-CARRIED_TURNS)
     .flatMap((t) => t.topics!);
   const topics = [...new Set([...classification.topics, ...carried])];
-  const prompt = buildPrompt(knowledge, topics);
+  const prompt = buildPrompt(knowledge, topics, context);
 
   const channelNote =
     channel === "voice"
@@ -108,22 +125,68 @@ export async function answer(input: AnswerInput): Promise<AnswerResult> {
     },
   ];
 
+  const messages = [
+    ...history.map((t) => ({
+      role: (t.role === "assistant" ? "assistant" : "user") as "assistant" | "user",
+      content: t.role === "owner" ? `[message from the club owner] ${t.body}` : t.body,
+    })),
+    { role: "user" as const, content: message },
+  ];
+  const call = (msgs: typeof messages) =>
+    anthropic().messages.parse({
+      model: MODELS.ANSWERER,
+      max_tokens: 16000,
+      system,
+      messages: msgs,
+      output_config: { format: zodOutputFormat(AnswerSchema), effort: ANSWER_EFFORT },
+    });
+
   const started = Date.now();
-  const response = await anthropic().messages.parse({
-    model: MODELS.ANSWERER,
-    max_tokens: 16000,
-    system,
-    messages: [
-      ...history.map((t) => ({
-        role: (t.role === "assistant" ? "assistant" : "user") as "assistant" | "user",
-        content: t.role === "owner" ? `[message from the club owner] ${t.body}` : t.body,
-      })),
-      { role: "user" as const, content: message },
-    ],
-    output_config: { format: zodOutputFormat(AnswerSchema), effort: ANSWER_EFFORT },
-  });
+  let response = await call(messages);
+  let usage = addUsage(classification.usage, response.usage);
+  let costUsd = costOf(classification.model, classification.usage) + costOf(response.model, response.usage);
+
+  const sources = {
+    texts: [JSON.stringify(knowledge), ...notices.map((n) => n.text), ...history.map((t) => t.body), message],
+    nearbyDays: upcomingDays(now, 14),
+  };
+  let grounding: AnswerResult["grounding"] = { retried: false, firstDraft: null, unsupported: [] };
+
+  // One rewrite when the first draft has a figure nothing supports. Most of
+  // the time that's a calculation it can show, or a guess it can drop.
+  const first = response.parsed_output;
+  const firstBad = first ? unsupportedFigures(first.reply, sources) : [];
+  if (first && response.stop_reason !== "refusal" && firstBad.length > 0) {
+    const retry = await call([
+      ...messages,
+      { role: "assistant", content: JSON.stringify(first) },
+      {
+        role: "user",
+        content: `[Automatic check by the club's system, not from the parent] Your reply mentions ${firstBad.join(", ")}, which the club details, notices and conversation don't contain. Write the reply again using only figures from those. If a figure is your own calculation from the club's figures, show the working briefly. If you don't have the figure, say you'll check with the owner and escalate. Same format as before.`,
+      },
+    ]);
+    usage = addUsage(usage, retry.usage);
+    costUsd += costOf(retry.model, retry.usage);
+    if (retry.parsed_output && retry.stop_reason !== "refusal") {
+      response = retry;
+      grounding = {
+        retried: true,
+        firstDraft: first.reply,
+        unsupported: unsupportedFigures(retry.parsed_output.reply, sources),
+      };
+    } else {
+      grounding = { retried: true, firstDraft: first.reply, unsupported: firstBad };
+    }
+  }
 
   const latencyMs = Date.now() - started;
+  const trajectory = {
+    system: system.map((b) => b.text).join("\n\n---\n\n"),
+    classifierTopics: classification.topics,
+    injectedRuleIds: prompt.injectedRules.map((r) => r.id),
+    history,
+    message,
+  };
 
   // Guard the stop reason before touching content: a refusal is a graded
   // outcome with no usable reply, not an exception and not a wrong answer.
@@ -137,17 +200,13 @@ export async function answer(input: AnswerInput): Promise<AnswerResult> {
       usedRules: prompt.injectedRules.map((r) => ({ id: r.id, text: r.text })),
       status: "refusal",
       stopReason: response.stop_reason,
-      usage: addUsage(classification.usage, response.usage),
-      costUsd: costOf(classification.model, classification.usage) + costOf(response.model, response.usage),
+      usage,
+      costUsd,
       servedModel: response.model,
       latencyMs,
-      trajectory: {
-        system: system.map((b) => b.text).join("\n\n---\n\n"),
-        classifierTopics: classification.topics,
-        injectedRuleIds: prompt.injectedRules.map((r) => r.id),
-        history,
-        message,
-      },
+      grounding,
+      context,
+      trajectory,
     };
   }
 
@@ -177,16 +236,12 @@ export async function answer(input: AnswerInput): Promise<AnswerResult> {
     usedRules: prompt.injectedRules.map((r) => ({ id: r.id, text: r.text })),
     status: response.stop_reason === "max_tokens" ? "truncated" : "ok",
     stopReason: response.stop_reason ?? null,
-    usage: addUsage(classification.usage, response.usage),
-    costUsd: costOf(classification.model, classification.usage) + costOf(response.model, response.usage),
+    usage,
+    costUsd,
     servedModel: response.model,
     latencyMs,
-    trajectory: {
-      system: system.map((b) => b.text).join("\n\n---\n\n"),
-      classifierTopics: classification.topics,
-      injectedRuleIds: prompt.injectedRules.map((r) => r.id),
-      history,
-      message,
-    },
+    grounding,
+    context,
+    trajectory,
   };
 }
