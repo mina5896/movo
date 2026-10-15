@@ -325,7 +325,7 @@ function StatusBar(props: {
               value={props.publishLabel}
               onChange={(e) => props.setPublishLabel(e.target.value)}
               placeholder="What changed? (optional)"
-              className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-sm"
+              className="min-w-48 flex-1 rounded-lg border border-[var(--border)] bg-transparent px-3 py-2 text-sm"
             />
             <button
               onClick={() => {
